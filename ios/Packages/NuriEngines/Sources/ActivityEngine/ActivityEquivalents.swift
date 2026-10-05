@@ -40,7 +40,7 @@ public struct EquivalentOption: Equatable, Sendable {
 
 public enum EquivalentsResult: Equatable, Sendable {
     public enum SuppressionReason: Equatable, Sendable {
-        case disabled, sensitiveMode, missingWeight, invalidTarget
+        case disabled, sensitiveMode, missingWeight, invalidTarget, noEligibleActivities
     }
     case suppressed(SuppressionReason)
     case options([EquivalentOption])
@@ -57,6 +57,10 @@ public enum ActivityEquivalents {
         return (Int(roundTo(minutes, step: 10)), false)
     }
 
+    /// Recommends activities matched to target energy expenditure.
+    /// Ranking order: preferred activities (in user order), then activities fitting available time,
+    /// then shorter minimum duration, then activity ID. Walking is always included if available.
+    /// Returns `.suppressed(.noEligibleActivities)` if no activities match constraints.
     public static func recommend(_ input: EquivalentsInput, catalog: METCatalog) -> EquivalentsResult {
         guard input.enabled else { return .suppressed(.disabled) }
         guard !input.sensitiveMode else { return .suppressed(.sensitiveMode) }
@@ -100,6 +104,7 @@ public enum ActivityEquivalents {
             if top.count == maxOptions { top.removeLast() }
             top.append(walking)
         }
+        guard !top.isEmpty else { return .suppressed(.noEligibleActivities) }
         return .options(top)
     }
 }

@@ -6,9 +6,9 @@ import Testing
 
     func input(enabled: Bool = true, sensitive: Bool = false, kcal: Double = 450, weight: Double? = 70,
                preferred: [String] = [], equipment: Set<String> = ["bicycle", "pool"],
-               available: Int? = nil) -> EquivalentsInput {
+               available: Int? = nil, mobility: Set<MobilityPreference> = []) -> EquivalentsInput {
         EquivalentsInput(targetKcal: kcal, weightKg: weight, preferredActivityIds: preferred,
-                         availableMinutes: available, equipment: equipment, mobility: [],
+                         availableMinutes: available, equipment: equipment, mobility: mobility,
                          sensitiveMode: sensitive, enabled: enabled)
     }
 
@@ -65,5 +65,22 @@ import Testing
             Issue.record("expected options"); return
         }
         #expect(options.allSatisfy { !$0.suggestSplitting })
+    }
+
+    @Test func timeFitRankingPlacesShortDurationsFirst() {
+        guard case .options(let options) = ActivityEquivalents.recommend(
+            input(kcal: 450, weight: 70, preferred: [], equipment: ["bicycle", "pool"], available: 60),
+            catalog: catalog) else {
+            Issue.record("expected options"); return
+        }
+        let fitsTimeIdx = options.firstIndex { o in o.minutesLow <= 60 && o.activityId != "walking" } ?? Int.max
+        let exceedsTimeIdx = options.firstIndex { o in o.minutesLow > 60 && o.activityId != "walking" } ?? Int.max
+        #expect(fitsTimeIdx < exceedsTimeIdx)
+    }
+
+    @Test func noEligibleActivitiesWithRestrictiveConstraintsSuppresses() {
+        let result = ActivityEquivalents.recommend(
+            input(equipment: [], mobility: [.seatedOnly]), catalog: catalog)
+        #expect(result == .suppressed(.noEligibleActivities))
     }
 }
