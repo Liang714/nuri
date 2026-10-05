@@ -50,6 +50,13 @@ import NuriDomain
         #expect(MovementPlanner.balanceSessionsGoal(ageYears: 65) == 3)
     }
 
+    @Test func moderateEquivalentMinutesCountsByMETBand() {
+        #expect(MovementPlanner.moderateEquivalentMinutes(met: 2.99, minutes: 30) == 0)
+        #expect(MovementPlanner.moderateEquivalentMinutes(met: 3.0, minutes: 30) == 30)
+        #expect(MovementPlanner.moderateEquivalentMinutes(met: 5.99, minutes: 30) == 30)
+        #expect(MovementPlanner.moderateEquivalentMinutes(met: 6.0, minutes: 30) == 60)
+    }
+
     @Test func readinessScreen() {
         #expect(!ReadinessScreen(yesAnswers: []).needsClearance)
         #expect(ReadinessScreen(yesAnswers: [.pregnancy]).needsClearance)

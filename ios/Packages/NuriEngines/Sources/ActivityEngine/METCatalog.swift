@@ -2,6 +2,14 @@ import Foundation
 
 public enum Intensity: String, Codable, Sendable, CaseIterable {
     case light, moderate, vigorous
+
+    /// MET band (WHO 2020 / Compendium): < 3 light, 3 to < 6 moderate, >= 6 vigorous.
+    /// Every intensity label the engines return is derived from the item's MET with this function,
+    /// whichever catalog column the MET came from.
+    public static func forMET(_ met: Double) -> Intensity {
+        if met >= 6 { return .vigorous }
+        return met >= 3 ? .moderate : .light
+    }
 }
 
 public enum ActivityCategory: String, Codable, Sendable, CaseIterable {

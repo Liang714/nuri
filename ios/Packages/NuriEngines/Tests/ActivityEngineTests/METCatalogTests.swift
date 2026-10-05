@@ -36,4 +36,11 @@ func approx(_ a: Double, _ b: Double, tol: Double = 0.01) -> Bool { abs(a - b) <
         let obese = c.eligible(category: .aerobic, equipment: [], mobility: [], requireLowImpact: true).map(\.id)
         #expect(!obese.contains("running"))
     }
+
+    @Test func intensityFollowsMETBand() {
+        #expect(Intensity.forMET(2.99) == .light)
+        #expect(Intensity.forMET(3.0) == .moderate)
+        #expect(Intensity.forMET(5.99) == .moderate)
+        #expect(Intensity.forMET(6.0) == .vigorous)
+    }
 }

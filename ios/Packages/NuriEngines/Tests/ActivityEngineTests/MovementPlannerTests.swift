@@ -110,14 +110,15 @@ import NutritionEngine
         #expect(a.intensity != .vigorous)
     }
 
-    @Test func lightlyActiveCyclistGetsLightIntensityBelow6MET() throws {
+    @Test func lightlyActiveCyclistGetsLightColumnLabelledByMET() throws {
         let p = plan {
             $0.profile.activityLevel = .lightlyActive
             $0.preferredActivityIds = ["cycling_outdoor"]
             $0.equipment = ["bicycle"]
         }
         let a = try #require(aerobic(p))
-        #expect(a.activityId == "cycling_outdoor" && a.intensity == .light && a.met == 4.0)
+        // The catalog "light" column (4.0 MET) is used, but 4.0 MET is moderate by the MET band.
+        #expect(a.activityId == "cycling_outdoor" && a.intensity == .moderate && a.met == 4.0)
     }
 
     @Test func obeseStationaryCyclistStaysBelow6MET() throws {
@@ -129,7 +130,7 @@ import NutritionEngine
             $0.equipment = ["stationary_bike"]
         }
         let a = try #require(aerobic(p))
-        #expect(a.activityId == "cycling_stationary" && a.met == 3.5 && a.intensity == .light)
+        #expect(a.activityId == "cycling_stationary" && a.met == 3.5 && a.intensity == .moderate)
     }
 
     @Test func performanceWalkingIsModerateNotVigorous() throws {
@@ -214,6 +215,8 @@ import NutritionEngine
     @Test func olderAdultsGetBalance() {
         let p = plan { $0.profile.ageYears = 70 }
         #expect(p.items.contains { $0.kind == .balance && $0.activityId == "tai_chi" })
+        // Tai chi's only catalog value is 3.0 MET, which is moderate by the MET band.
+        #expect(p.items.contains { $0.kind == .balance && $0.met == 3.0 && $0.intensity == .moderate })
     }
 
     @Test func performanceAllowsVigorousWithHalvedMinutes() throws {

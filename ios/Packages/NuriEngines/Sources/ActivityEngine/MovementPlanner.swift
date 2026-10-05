@@ -26,6 +26,16 @@ public enum MovementPlanner {
         }
     }
 
+    /// WHO 2020 counting for `WeeklyActivitySummary`: a minute at >= 6 MET counts as 2 moderate minutes,
+    /// a minute at 3 to < 6 MET counts as 1, and light activity (< 3 MET) does not count.
+    public static func moderateEquivalentMinutes(met: Double, minutes: Double) -> Double {
+        switch Intensity.forMET(met) {
+        case .vigorous: minutes * 2
+        case .moderate: minutes
+        case .light: 0
+        }
+    }
+
     public static func startingWeeklyMinutes(for level: ActivityLevel) -> Int {
         switch level {
         case .sedentary: 60
@@ -119,7 +129,8 @@ public enum MovementPlanner {
                 moderateMinutes = Double(dailyMaxMinutes)
                 notices.append(.cappedAtDailyMaximum)
             }
-            var minutes = prescription.intensity == .vigorous ? moderateMinutes / 2 : moderateMinutes
+            // WHO: one minute at >= 6 MET counts as two moderate minutes, so the item is halved.
+            var minutes = prescription.met >= 6 ? moderateMinutes / 2 : moderateMinutes
             var limitedByBudget = false
             if minutes > budget {
                 // Aerobic minutes never exceed 90, so only the available time can bind the budget here.
@@ -128,8 +139,8 @@ public enum MovementPlanner {
                 notices.append(.limitedByAvailableTime)
             }
             if !(limitedByBudget && minutes < Double(minimumSessionMinutes)) {
-                let item = makeItem(.aerobic, activity: activity, intensity: prescription.intensity,
-                                    met: prescription.met, minutes: minutes, cap: budget, input: input)
+                let item = makeItem(.aerobic, activity: activity, met: prescription.met,
+                                    minutes: minutes, cap: budget, input: input)
                 items.append(item)
                 budget -= Double(item.minutesHigh)
             }
@@ -143,8 +154,7 @@ public enum MovementPlanner {
                                  allowVigorous: false),
            let met = activity.met.moderate {
             let high = Int(min(25, budget))
-            items.append(fixedItem(.strength, activity: activity, intensity: .moderate, met: met,
-                                   low: 15, high: high, input: input))
+            items.append(fixedItem(.strength, activity: activity, met: met, low: 15, high: high, input: input))
             budget -= Double(high)
         }
 
@@ -154,8 +164,7 @@ public enum MovementPlanner {
            let activity = catalog.activity(id: "tai_chi"),
            let met = activity.met.light {
             let high = Int(min(15, budget))
-            items.append(fixedItem(.balance, activity: activity, intensity: .light, met: met,
-                                   low: 10, high: high, input: input))
+            items.append(fixedItem(.balance, activity: activity, met: met, low: 10, high: high, input: input))
             budget -= Double(high)
         }
 
@@ -180,7 +189,7 @@ public enum MovementPlanner {
         if let activity = catalog.activity(id: activityId),
            Set(activity.equipment).isSubset(of: input.equipment),
            let met = activity.met.light {
-            items.append(PlanItem(kind: .aerobic, activityId: activity.id, intensity: .light, met: met,
+            items.append(PlanItem(kind: .aerobic, activityId: activity.id, intensity: Intensity.forMET(met), met: met,
                                   minutesLow: 10, minutesHigh: 20, kcal: nil))
         }
         return MovementPlan(
@@ -192,14 +201,15 @@ public enum MovementPlanner {
         )
     }
 
-    /// Intensity follows the MET value, not the catalog label: an item is vigorous iff its MET is ≥ 6
-    /// (WHO / Compendium), and only when vigorous work is allowed for this user. Otherwise the first of
-    /// moderate / light that stays below 6 MET is used. Nil when the activity has no safe intensity for the user.
+    /// Column selection: when vigorous work is allowed, the vigorous column is used if its MET is >= 6;
+    /// otherwise (or when not allowed) the first of the moderate / light columns below 6 MET. Nil when the
+    /// activity has no usable column for the user. The label is always the MET band (`Intensity.forMET`),
+    /// never the catalog column name, so the item is vigorous iff its MET is >= 6.
     private static func aerobicPrescription(for activity: ActivityType,
                                             allowVigorous: Bool) -> (intensity: Intensity, met: Double)? {
-        if allowVigorous, let met = activity.met.vigorous, met >= 6 { return (.vigorous, met) }
-        for intensity in [Intensity.moderate, .light] {
-            if let met = activity.met.value(for: intensity), met < 6 { return (intensity, met) }
+        if allowVigorous, let met = activity.met.vigorous, met >= 6 { return (Intensity.forMET(met), met) }
+        for column in [Intensity.moderate, .light] {
+            if let met = activity.met.value(for: column), met < 6 { return (Intensity.forMET(met), met) }
         }
         return nil
     }
@@ -218,19 +228,19 @@ public enum MovementPlanner {
         return eligible.first { $0.id == fallbackId } ?? eligible.first
     }
 
-    private static func makeItem(_ kind: PlanItemKind, activity: ActivityType, intensity: Intensity, met: Double,
+    private static func makeItem(_ kind: PlanItemKind, activity: ActivityType, met: Double,
                                  minutes: Double, cap: Double?, input: MovementPlanInput) -> PlanItem {
         let upper = min(Double(dailyMaxMinutes), cap ?? .infinity)
         let low = max(5, min(upper, roundTo(minutes * 0.9, step: 5)))
         let high = max(low, min(upper, roundTo(minutes * 1.1, step: 5)))
-        return PlanItem(kind: kind, activityId: activity.id, intensity: intensity, met: met,
+        return PlanItem(kind: kind, activityId: activity.id, intensity: Intensity.forMET(met), met: met,
                         minutesLow: Int(low), minutesHigh: Int(high),
                         kcal: kcalRange(met: met, low: low, estimate: minutes, high: high, input: input))
     }
 
-    private static func fixedItem(_ kind: PlanItemKind, activity: ActivityType, intensity: Intensity, met: Double,
+    private static func fixedItem(_ kind: PlanItemKind, activity: ActivityType, met: Double,
                                   low: Int, high: Int, input: MovementPlanInput) -> PlanItem {
-        PlanItem(kind: kind, activityId: activity.id, intensity: intensity, met: met,
+        PlanItem(kind: kind, activityId: activity.id, intensity: Intensity.forMET(met), met: met,
                  minutesLow: low, minutesHigh: high,
                  kcal: kcalRange(met: met, low: Double(low), estimate: Double(low + high) / 2,
                                  high: Double(high), input: input))

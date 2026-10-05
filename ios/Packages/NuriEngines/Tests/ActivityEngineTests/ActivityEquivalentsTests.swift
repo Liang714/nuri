@@ -46,7 +46,14 @@ import Testing
         #expect(swim.minutesLow == 50 && swim.minutesHigh == 80)
         let walk = try #require(options.first { $0.activityId == "walking" })
         #expect(walk.highIsOpenEnded && walk.suggestSplitting)
-        #expect(options.allSatisfy { $0.intensity != .vigorous })
+        // The catalog moderate column is used (never the vigorous column); the label follows the MET band.
+        #expect(cycling.met == 6.8 && cycling.intensity == .vigorous)
+        #expect(swim.met == 5.8 && swim.intensity == .moderate)
+        for o in options {
+            let a = try #require(catalog.activity(id: o.activityId))
+            #expect(o.met == (a.met.moderate ?? a.met.light))
+            #expect(o.intensity == Intensity.forMET(o.met))
+        }
     }
 
     @Test func preferredFirstCappedAtFiveAndIncludesWalking() {
@@ -95,13 +102,42 @@ import Testing
         #expect(running.suggestSplitting)
     }
 
-    @Test func withoutPreferencesOptionsAreOrderedByShorterMinimumDuration() {
+    @Test func withoutPreferencesModerateOptionsPrecedeVigorous() {
+        // 450 kcal, 70 kg, bicycle + pool: running (8.3 MET, 40 min) and cycling (6.8 MET, 50 min) are vigorous
+        // by the MET band, so they rank after every non-vigorous option even though they are shorter.
         guard case .options(let options) = ActivityEquivalents.recommend(input(), catalog: catalog) else {
             Issue.record("expected options"); return
         }
-        let lows = options.filter { $0.activityId != "walking" }.map(\.minutesLow)
-        #expect(lows.count >= 2)
-        #expect(lows == lows.sorted())
+        let vigorous = options.filter { $0.intensity == .vigorous }
+        let nonVigorous = options.filter { $0.intensity != .vigorous }
+        #expect(!vigorous.isEmpty && !nonVigorous.isEmpty)
+        let lastNonVigorous = options.lastIndex { $0.intensity != .vigorous } ?? -1
+        let firstVigorous = options.firstIndex { $0.intensity == .vigorous } ?? options.count
+        #expect(lastNonVigorous < firstVigorous)
+        #expect(options.map(\.activityId) == ["swimming", "dancing", "strength_bodyweight", "walking", "running"])
+        // Within each band, shorter minimum duration first.
+        #expect(nonVigorous.map(\.minutesLow) == nonVigorous.map(\.minutesLow).sorted())
+    }
+
+    @Test func optionsThatFitAvailableTimeRankFirst() {
+        // 55 min available: swimming (50), running (40) and cycling (50) fit; dancing (60) does not.
+        guard case .options(let options) = ActivityEquivalents.recommend(input(available: 55), catalog: catalog) else {
+            Issue.record("expected options"); return
+        }
+        #expect(options.map(\.activityId) == ["swimming", "running", "cycling_outdoor", "dancing", "walking"])
+    }
+
+    @Test func minimumEqualToAvailableTimeFitsWithoutSplitting() throws {
+        // running: 40-60 min; exactly 40 min available still fits and needs no split.
+        guard case .options(let options) = ActivityEquivalents.recommend(
+            input(kcal: 450, weight: 70, preferred: [], equipment: [], available: 40),
+            catalog: catalog) else {
+            Issue.record("expected options"); return
+        }
+        let running = try #require(options.first { $0.activityId == "running" })
+        #expect(running.minutesLow == 40 && running.minutesHigh == 60)
+        #expect(!running.suggestSplitting)
+        #expect(options.first?.activityId == "running") // the only option that fits 40 min
     }
 
     @Test func noEligibleActivitiesWithRestrictiveConstraintsSuppresses() {

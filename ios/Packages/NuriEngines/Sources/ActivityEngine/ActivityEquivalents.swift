@@ -58,8 +58,13 @@ public enum ActivityEquivalents {
     }
 
     /// Recommends activities matched to target energy expenditure.
-    /// Ranking = preferred (user order) → shorter minimum duration → id; options that exceed the session cap
-    /// or the user's available time get `suggestSplitting`. Walking is always included if available.
+    /// MET column: the catalog moderate value, falling back to light; the vigorous column is never used.
+    /// The `intensity` label is the MET band (`Intensity.forMET`), so a moderate column of 6 MET or more
+    /// (running 8.3, cycling 6.8) is labelled vigorous.
+    /// Ranking (spec §5.6 rules 3 and 5): preferred (user order) → fits the available time
+    /// (minimum duration <= available minutes; everything fits when none is given) → non-vigorous before
+    /// vigorous → shorter minimum duration → id. Options that exceed the session cap or the user's available
+    /// time get `suggestSplitting`. Walking is always included if eligible.
     /// Returns `.suppressed(.noEligibleActivities)` if no activities match constraints.
     public static func recommend(_ input: EquivalentsInput, catalog: METCatalog) -> EquivalentsResult {
         guard input.enabled else { return .suppressed(.disabled) }
@@ -74,9 +79,9 @@ public enum ActivityEquivalents {
             .filter { $0.category == .aerobic || $0.category == .strength }
 
         let options: [EquivalentOption] = candidates.compactMap { activity in
-            // Moderate before vigorous: use moderate, falling back to light. Vigorous is never suggested here.
-            let intensity: Intensity = activity.met.moderate != nil ? .moderate : .light
-            guard let met = activity.met.value(for: intensity) else { return nil }
+            // Moderate column, falling back to light; never the vigorous column. The label is the MET band.
+            guard let met = activity.met.moderate ?? activity.met.light else { return nil }
+            let intensity = Intensity.forMET(met)
             let minutes = input.targetKcal / (met * weight) * 60
             let low = practicalMinutes(minutes * EnergyEstimator.lowFactor)
             let high = practicalMinutes(minutes * EnergyEstimator.highFactor)
@@ -88,13 +93,12 @@ public enum ActivityEquivalents {
             )
         }
 
-        func preferenceRank(_ o: EquivalentOption) -> Int {
-            input.preferredActivityIds.firstIndex(of: o.activityId) ?? Int.max
+        func sortKey(_ o: EquivalentOption) -> (Int, Int, Int, Int, String) {
+            let preferenceRank = input.preferredActivityIds.firstIndex(of: o.activityId) ?? Int.max
+            let fitsAvailable = input.availableMinutes.map { o.minutesLow <= $0 } ?? true
+            return (preferenceRank, fitsAvailable ? 0 : 1, o.intensity == .vigorous ? 1 : 0, o.minutesLow, o.activityId)
         }
-        let ranked = options.sorted {
-            (preferenceRank($0), $0.minutesLow, $0.activityId)
-                < (preferenceRank($1), $1.minutesLow, $1.activityId)
-        }
+        let ranked = options.sorted { sortKey($0) < sortKey($1) }
 
         var top = Array(ranked.prefix(maxOptions))
         if !top.contains(where: { $0.activityId == "walking" }),

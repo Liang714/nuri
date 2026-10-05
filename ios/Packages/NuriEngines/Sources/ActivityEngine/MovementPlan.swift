@@ -15,6 +15,9 @@ public struct ReadinessScreen: Codable, Sendable, Equatable {
 
 public struct WeeklyActivitySummary: Sendable, Equatable {
     /// Moderate-equivalent minutes so far this week (1 vigorous minute counts as 2, per WHO).
+    /// Callers must build this (and `previousWeekModerateEquivalentMinutes`) by summing
+    /// `MovementPlanner.moderateEquivalentMinutes(met:minutes:)` over the week's logged activities:
+    /// >= 6 MET counts double, 3 to < 6 MET counts once, < 3 MET does not count.
     public var moderateEquivalentMinutes: Double
     public var strengthSessions: Int
     public var balanceSessions: Int
