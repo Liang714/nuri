@@ -1,0 +1,11 @@
+name: engines
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run engine tests
+        run: swift test --package-path ios/Packages/NuriEngines
