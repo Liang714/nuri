@@ -26,6 +26,11 @@ public struct ActivityRecord: Sendable, Equatable {
 public struct DuplicatePair: Equatable, Sendable {
     public let firstId: String
     public let secondId: String
+
+    public init(firstId: String, secondId: String) {
+        self.firstId = firstId
+        self.secondId = secondId
+    }
 }
 
 /// Spec §5.5: never silently double-count activity energy.

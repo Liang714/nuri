@@ -21,6 +21,18 @@ public struct DailyLedger: Equatable, Sendable {
     /// Planning amount left. Nil without a target or in `.noEnergyMath`.
     public let remainingKcal: Double?
 
+    public init(foodKcal: Double, activityKcalBySource: [ActivityEnergySource: Double], totalActivityKcal: Double,
+                baseTargetKcal: Double?, creditedActivityKcal: Double, adjustedTargetKcal: Double?,
+                remainingKcal: Double?) {
+        self.foodKcal = foodKcal
+        self.activityKcalBySource = activityKcalBySource
+        self.totalActivityKcal = totalActivityKcal
+        self.baseTargetKcal = baseTargetKcal
+        self.creditedActivityKcal = creditedActivityKcal
+        self.adjustedTargetKcal = adjustedTargetKcal
+        self.remainingKcal = remainingKcal
+    }
+
     public static func compute(foodKcal: Double, activityKcalBySource: [ActivityEnergySource: Double],
                                baseTargetKcal: Double?, mode: ExerciseCreditMode) -> DailyLedger {
         let totalActivity = activityKcalBySource.values.reduce(0, +)

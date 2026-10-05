@@ -88,6 +88,17 @@ public struct PlanItem: Equatable, Sendable {
     public let minutesHigh: Int
     /// Nil in sensitive mode or clearance plans.
     public let kcal: EnergyRange?
+
+    public init(kind: PlanItemKind, activityId: String, intensity: Intensity, met: Double,
+                minutesLow: Int, minutesHigh: Int, kcal: EnergyRange?) {
+        self.kind = kind
+        self.activityId = activityId
+        self.intensity = intensity
+        self.met = met
+        self.minutesLow = minutesLow
+        self.minutesHigh = minutesHigh
+        self.kcal = kcal
+    }
 }
 
 public enum PlanNotice: String, Sendable {
@@ -112,6 +123,13 @@ public struct WeeklyTargets: Equatable, Sendable {
     public let thisWeekMinutes: Int
     public let strengthSessions: Int
     public let balanceSessions: Int
+
+    public init(goalMinutes: Int, thisWeekMinutes: Int, strengthSessions: Int, balanceSessions: Int) {
+        self.goalMinutes = goalMinutes
+        self.thisWeekMinutes = thisWeekMinutes
+        self.strengthSessions = strengthSessions
+        self.balanceSessions = balanceSessions
+    }
 }
 
 public struct MovementPlan: Equatable, Sendable {
@@ -119,4 +137,11 @@ public struct MovementPlan: Equatable, Sendable {
     public let weekly: WeeklyTargets
     public let notices: [PlanNotice]
     public let rationale: [PlanRationale]
+
+    public init(items: [PlanItem], weekly: WeeklyTargets, notices: [PlanNotice], rationale: [PlanRationale]) {
+        self.items = items
+        self.weekly = weekly
+        self.notices = notices
+        self.rationale = rationale
+    }
 }

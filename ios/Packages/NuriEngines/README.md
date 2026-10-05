@@ -18,7 +18,7 @@ Swift tools 6.0. Platforms: iOS 17, macOS 14 (macOS is declared only so `swift t
 swift test --package-path ios/Packages/NuriEngines
 ```
 
-CI runs the same command (`.github/workflows/engines.yml`).
+CI runs the same command (`.github/workflows/engines.yml`). `PublicAPITests` imports the three modules without `@testable`, so it fails to compile if a type the app needs (plan items, ranges, equivalents, catalog entries, ledger, recipe and target results) loses its public initializer.
 
 ## Rules the engines follow
 

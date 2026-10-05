@@ -25,6 +25,12 @@ public struct METValues: Codable, Sendable, Equatable {
     public let moderate: Double?
     public let vigorous: Double?
 
+    public init(light: Double?, moderate: Double?, vigorous: Double?) {
+        self.light = light
+        self.moderate = moderate
+        self.vigorous = vigorous
+    }
+
     public func value(for intensity: Intensity) -> Double? {
         switch intensity {
         case .light: light
@@ -40,6 +46,14 @@ public struct ActivityType: Codable, Sendable, Equatable, Identifiable {
     public let met: METValues
     public let equipment: [String]
     public let tags: [String]
+
+    public init(id: String, category: ActivityCategory, met: METValues, equipment: [String], tags: [String]) {
+        self.id = id
+        self.category = category
+        self.met = met
+        self.equipment = equipment
+        self.tags = tags
+    }
 
     public var isLowImpact: Bool { tags.contains("low_impact") }
     public var isSeated: Bool { tags.contains("seated") }

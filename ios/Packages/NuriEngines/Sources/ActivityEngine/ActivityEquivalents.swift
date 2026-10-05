@@ -36,6 +36,17 @@ public struct EquivalentOption: Equatable, Sendable {
     public let highIsOpenEnded: Bool
     /// True when the range exceeds the session cap; the UI offers "split across the day".
     public let suggestSplitting: Bool
+
+    public init(activityId: String, intensity: Intensity, met: Double, minutesLow: Int, minutesHigh: Int,
+                highIsOpenEnded: Bool, suggestSplitting: Bool) {
+        self.activityId = activityId
+        self.intensity = intensity
+        self.met = met
+        self.minutesLow = minutesLow
+        self.minutesHigh = minutesHigh
+        self.highIsOpenEnded = highIsOpenEnded
+        self.suggestSplitting = suggestSplitting
+    }
 }
 
 public enum EquivalentsResult: Equatable, Sendable {

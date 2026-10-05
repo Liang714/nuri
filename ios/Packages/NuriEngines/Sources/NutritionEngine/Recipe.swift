@@ -14,6 +14,13 @@ public struct RecipeNutrition: Sendable, Equatable {
     public let per100g: NutrientProfile?
     /// Cooked yield when given, otherwise the raw ingredient weight.
     public let totalGrams: Double
+
+    public init(total: NutrientProfile, perServing: NutrientProfile, per100g: NutrientProfile?, totalGrams: Double) {
+        self.total = total
+        self.perServing = perServing
+        self.per100g = per100g
+        self.totalGrams = totalGrams
+    }
 }
 
 public enum RecipeError: Error, Equatable, Sendable {

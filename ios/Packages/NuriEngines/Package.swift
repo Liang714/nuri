@@ -20,5 +20,6 @@ let package = Package(
         .testTarget(name: "NuriDomainTests", dependencies: ["NuriDomain"]),
         .testTarget(name: "NutritionEngineTests", dependencies: ["NutritionEngine", "NuriDomain"]),
         .testTarget(name: "ActivityEngineTests", dependencies: ["ActivityEngine", "NutritionEngine", "NuriDomain"]),
+        .testTarget(name: "PublicAPITests", dependencies: ["NuriDomain", "NutritionEngine", "ActivityEngine"]),
     ]
 )

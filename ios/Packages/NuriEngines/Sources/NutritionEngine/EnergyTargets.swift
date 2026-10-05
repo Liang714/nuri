@@ -73,6 +73,17 @@ public struct EnergyTargetEstimate: Equatable, Sendable {
     public let raisedToMinimum: Bool
     public let lossNotAppliedUnderweight: Bool
     public let method: String
+
+    public init(bmrKcal: Double, tdeeKcal: Double, adjustmentKcal: Double, targetKcal: Double,
+                raisedToMinimum: Bool, lossNotAppliedUnderweight: Bool, method: String) {
+        self.bmrKcal = bmrKcal
+        self.tdeeKcal = tdeeKcal
+        self.adjustmentKcal = adjustmentKcal
+        self.targetKcal = targetKcal
+        self.raisedToMinimum = raisedToMinimum
+        self.lossNotAppliedUnderweight = lossNotAppliedUnderweight
+        self.method = method
+    }
 }
 
 public enum ManualTargetAssessment: Equatable, Sendable {

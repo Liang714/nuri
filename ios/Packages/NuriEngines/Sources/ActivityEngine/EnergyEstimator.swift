@@ -2,6 +2,12 @@ public struct EnergyRange: Equatable, Sendable {
     public let low: Double
     public let estimate: Double
     public let high: Double
+
+    public init(low: Double, estimate: Double, high: Double) {
+        self.low = low
+        self.estimate = estimate
+        self.high = high
+    }
 }
 
 public enum EnergyEstimator {
