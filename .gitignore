@@ -8,3 +8,4 @@ xcuserdata/
 node_modules/
 supabase/.temp/
 data-pipeline/raw/
+.superpowers/
