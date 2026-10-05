@@ -9,15 +9,16 @@ public enum MovementPlanner {
 
     /// WHO 2020: 150–300 min/week moderate. For gradual loss, the activity share of the deficit
     /// sets the weekly minutes (ACSM 2009: 150–250+ min/week), bounded to 150…300.
+    /// Deficit and share are clamped by `GoalAdjustmentPolicy.lossSplit`, the same rule the food side
+    /// (`GoalAdjustmentPolicy.foodAdjustment`) uses, so the two parts add up to the clamped deficit.
     public static func weeklyAerobicGoalMinutes(goal: Goal, weightKg: Double, primaryModerateMET: Double,
                                                 lossDeficitKcal: Double, activityShare: Double) -> Int {
         switch goal {
         case .performance:
             return whoUpperWeeklyMinutes
         case .gradualLoss:
-            let deficit = min(500, max(0, lossDeficitKcal))
-            let share = min(0.5, max(0, activityShare))
-            let dailyKcal = deficit * share
+            let split = GoalAdjustmentPolicy.lossSplit(deficitKcal: lossDeficitKcal, activityShare: activityShare)
+            let dailyKcal = split.deficitKcal * split.activityShare
             let dailyMinutes = dailyKcal / (primaryModerateMET * weightKg) * 60
             let weekly = roundTo(dailyMinutes * 7, step: 5)
             return Int(min(Double(whoUpperWeeklyMinutes), max(Double(whoBaseWeeklyMinutes), weekly)))

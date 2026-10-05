@@ -71,6 +71,34 @@ import NuriDomain
         }
     }
 
+    @Test(arguments: [
+        (250.0, 0.5, -125.0),
+        (500.0, 0.5, -250.0),
+        (2000.0, 1.0, -250.0), // clamped to 500 kcal and a 0.5 share
+        (250.0, 0.0, -250.0),
+    ])
+    func foodAdjustmentTakesTheNonActivityPartOfTheDeficit(deficit: Double, share: Double, expected: Double) {
+        #expect(GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal: deficit, activityShare: share) == expected)
+    }
+
+    @Test func foodAdjustmentNonFiniteInputsUseDefaults() {
+        #expect(GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal: .nan, activityShare: .nan) == -125)
+        #expect(GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal: .infinity, activityShare: 0.5) == -125)
+        #expect(GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal: 250, activityShare: -.infinity) == -125)
+    }
+
+    @Test func foodAndActivitySharesSumToTheClampedDeficit() {
+        for deficit in [-100.0, 0, 100, 250, 400, 500, 2000] {
+            for share in [-1.0, 0, 0.25, 0.5, 1] {
+                let d = min(500, max(0, deficit))
+                let s = min(0.5, max(0, share))
+                let food = -GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal: deficit, activityShare: share)
+                #expect(approx(food + d * s, d), "d \(deficit) s \(share)")
+                #expect(food + d * s <= 500)
+            }
+        }
+    }
+
     @Test func manualTargetAssessmentWarnsButDoesNotBlock() {
         #expect(EnergyTargetCalculator.assessManualTarget(1100, sex: .female) == .belowRecommendedMinimum(minimumKcal: 1200))
         #expect(EnergyTargetCalculator.assessManualTarget(1400, sex: .male) == .belowRecommendedMinimum(minimumKcal: 1500))

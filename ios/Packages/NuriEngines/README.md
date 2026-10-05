@@ -52,6 +52,7 @@ Product choices, not taken from the guidelines above: the +10% weekly progressio
 | Profile limits | age 18 to 120, height 100 to 250 cm, weight 30 to 350 kg | `NuriDomain/BodyProfile.swift` (`BodyProfile`) |
 | Activity factors | 1.2, 1.375, 1.55, 1.725, 1.9 | `NuriDomain/BodyProfile.swift` (`ActivityLevel.factor`) |
 | Loss adjustment | default -250, maximum -500 kcal/day | `NutritionEngine/EnergyTargets.swift` (`GoalAdjustmentPolicy`) |
+| Loss deficit split | deficit clamped to 0 to 500 kcal (non-finite: 250), activity share to 0 to 0.5 (non-finite: 0.5). Food part = -deficit x (1 - share); activity part = deficit x share; together they equal the clamped deficit | `NutritionEngine/EnergyTargets.swift` (`GoalAdjustmentPolicy.lossSplit`, `foodAdjustment`), used by `MovementPlanner.weeklyAerobicGoalMinutes` |
 | Gain adjustment | default +200, maximum +500 kcal/day | `NutritionEngine/EnergyTargets.swift` (`GoalAdjustmentPolicy`) |
 | Minimum calculated target | 1500 kcal (male), 1200 kcal (female); target rounded to 10 kcal. Without a sex value `estimate` returns nil and the app offers manual setup | `NutritionEngine/EnergyTargets.swift` (`LowTargetPolicy`, `EnergyTargetCalculator.estimate`) |
 | Manual target | valid when 0 < kcal <= 10,000; below the minimum is `belowRecommendedMinimum` (non-blocking). The minimum is 1500 kcal (male) or 1200 kcal (female or no sex given) | `NutritionEngine/EnergyTargets.swift` (`assessManualTarget`, `LowTargetPolicy`) |

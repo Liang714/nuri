@@ -45,9 +45,11 @@ public struct MovementPlanInput: Sendable {
     public var availableMinutesToday: Int?
     public var week: WeeklyActivitySummary
     public var daysRemainingInWeekIncludingToday: Int
-    /// Total daily deficit for gradual loss (clamped to 0…500 kcal).
+    /// Total daily deficit for gradual loss (clamped to 0…500 kcal; non-finite → 250).
     public var lossDeficitKcal: Double
-    /// Part of that deficit planned through activity (clamped to 0…0.5); the rest comes from the food target.
+    /// Part of that deficit planned through activity (clamped to 0…0.5; non-finite → 0.5). The rest comes from the
+    /// food target: pass `GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal:activityShare:)` with the same two
+    /// values as `adjustmentKcal` to `EnergyTargetCalculator.estimate`.
     public var activityShareOfDeficit: Double
     public var sensitiveMode: Bool
 

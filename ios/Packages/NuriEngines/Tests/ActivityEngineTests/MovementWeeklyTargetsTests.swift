@@ -23,6 +23,14 @@ import NuriDomain
                                                          lossDeficitKcal: 2000, activityShare: 1) == 300)
     }
 
+    @Test func nonFiniteLossInputsUseTheSameDefaultsAsTheFoodSplit() {
+        // Same fallbacks as GoalAdjustmentPolicy.foodAdjustment: 250 kcal and a 0.5 share → 215 min/week.
+        #expect(MovementPlanner.weeklyAerobicGoalMinutes(goal: .gradualLoss, weightKg: 70, primaryModerateMET: 3.5,
+                                                         lossDeficitKcal: .nan, activityShare: .nan) == 215)
+        #expect(MovementPlanner.weeklyAerobicGoalMinutes(goal: .gradualLoss, weightKg: 70, primaryModerateMET: 3.5,
+                                                         lossDeficitKcal: .infinity, activityShare: 0.5) == 215)
+    }
+
     @Test func performanceUsesUpperGuideline() {
         #expect(MovementPlanner.weeklyAerobicGoalMinutes(goal: .performance, weightKg: 70, primaryModerateMET: 3.5,
                                                          lossDeficitKcal: 250, activityShare: 0.5) == 300)
