@@ -60,7 +60,8 @@ Product choices, not taken from the guidelines above: the +10% weekly progressio
 | BMI cutoffs | WHO: 25 overweight, 30 obese. Asia-Pacific: 23 overweight, 25 obese | `NutritionEngine/BMI.swift` (`BMI.category`) |
 | Asia-Pacific default regions | KR JP CN TW HK MO SG MY TH VN PH ID MN | `NutritionEngine/BMI.swift` (`BMIStandard.asianPacificRegions`) |
 | Activity energy range | low 0.80x, high 1.25x of the estimate | `ActivityEngine/EnergyEstimator.swift` |
-| Daily plan cap | 90 min/day, one budget shared by aerobic, strength and balance | `ActivityEngine/MovementPlanner.swift` (`dailyMaxMinutes`) |
+| Daily plan cap | 90 min/day, one budget of min(90, available minutes) shared by aerobic, strength and balance, on every path including the clearance plan | `ActivityEngine/MovementPlanner.swift` (`dailyMaxMinutes`) |
+| Session cap | `MovementPlanInput.maxSessionMinutes`, default 60 (spec §4 `max_suggested_session_minutes`), clamped to 10 to 90. Caps every aerobic item (actual minutes, after halving for vigorous); `cappedAtSessionMaximum` when it binds | `ActivityEngine/MovementPlanner.swift` (`sessionCapRange`, `plan`) |
 | Minimum aerobic session | 10 min of moderate-equivalent time; a vigorous item is halved, so it can be about 5 min | `ActivityEngine/MovementPlanner.swift` (`minimumSessionMinutes`, `plan`) |
 | Weekly aerobic goal | 150 base, 300 upper (moderate-equivalent min) | `ActivityEngine/MovementPlanner.swift` (`weeklyAerobicGoalMinutes`) |
 | Starting weekly minutes | 60 sedentary, 90 lightly active, 150 otherwise | `ActivityEngine/MovementPlanner.swift` (`startingWeeklyMinutes`) |
@@ -70,19 +71,21 @@ Product choices, not taken from the guidelines above: the +10% weekly progressio
 | Moderate-equivalent minutes | >= 6 MET counts x2, 3 to < 6 MET x1, < 3 MET not counted | `ActivityEngine/MovementPlanner.swift` (`moderateEquivalentMinutes(met:minutes:)`) |
 | Strength sessions | 2 per week; 3 for gradual gain and performance; 15 to 25 min each | `ActivityEngine/MovementPlanner.swift` (`strengthSessionsGoal`, `plan`) |
 | Balance sessions | 3 per week at age 65 or older (tai chi, 10 to 15 min). Seated-only users get no balance item, though `weekly.balanceSessions` still reports 3 | `ActivityEngine/MovementPlanner.swift` (`balanceSessionsGoal`, `plan`) |
-| Readiness | any "yes" answer produces the clearance plan | `ActivityEngine/MovementPlan.swift` (`ReadinessScreen.needsClearance`) |
+| Readiness | any "yes" answer produces the clearance plan: one 10 to 20 min item, within the budget and the session cap | `ActivityEngine/MovementPlan.swift` (`ReadinessScreen.needsClearance`), `MovementPlanner.swift` (`clearanceMaxMinutes`) |
 | Equivalents | opt-in; at most 5 options; session cap default 60 min; target must be 0 < kcal <= 5000 | `ActivityEngine/ActivityEquivalents.swift` |
 | Duplicate activity | same activity type, different ids, overlap > 80% of the longer duration | `ActivityEngine/DuplicateDetector.swift` (`overlapThreshold`) |
 | Atwater tolerance | stated energy flagged when it differs from 4 x protein + 4 x carbs + 9 x fat by more than max(20 kcal, 20% of the larger of stated and computed). Needs protein, carbs and fat present, otherwise `insufficientData` | `NutritionEngine/Nutrients.swift` (`EnergyConsistency`) |
 
 ## Movement plan (`MovementPlanner.plan`)
 
-- **Readiness.** Any "yes" returns the clearance plan: one light 10 to 20 min item (walking; stationary cycling for seated-only), no kcal numbers, notice `clinicianClearanceRecommended`.
+- **Readiness.** Any "yes" returns the clearance plan: one item from the light column (walking 2.8 MET, labelled light; stationary cycling 3.5 MET for seated-only, labelled moderate by the MET band), no kcal numbers, notice `clinicianClearanceRecommended` first. The item is 10 to min(20, budget, session cap) minutes; `cappedAtSessionMaximum` / `limitedByAvailableTime` are added when those bounds shorten it. Under 10 min of budget there is no item and `limitedByAvailableTime` is added. Without a usable activity (seated-only, no stationary bike) the notice is `noSuitableActivity`.
 - **Underweight (BMI < 18.5).** Always adds `underweightNoLossPlan` (the clinician-consultation signal), whatever the goal; the clearance plan is the exception, see Known limitations. Loss and performance goals are treated as maintain. Vigorous work is never allowed. Gradual gain keeps its goal.
 - **Obese.** Only low-impact activities are eligible. Notice `lowImpactSelected` when a non-low-impact preference was dropped. Obese is decided by the user's BMI standard.
 - **Vigorous work** requires all of: activity level at least moderately active, BMI not obese and not underweight, goal performance. A vigorous item uses half the minutes of its moderate-equivalent amount.
 - **Intensity follows MET, not the catalog label.** Column selection: the vigorous column is used only when vigorous work is allowed and that column is >= 6 MET. Otherwise the first of the moderate or light columns that is below 6 MET is used. An activity with no column under 6 MET is skipped for non-vigorous users, and the planner falls through to the next preference, then walking (strength: bodyweight), then the first eligible activity in catalog order. Every item's `intensity` is the MET band of its `met` (`Intensity.forMET`), so the catalog "light" column of outdoor cycling (4.0) or stationary cycling (3.5) is labelled moderate, tai chi (3.0) is moderate, and light walking (2.8) stays light. An aerobic item is halved if and only if its MET is >= 6.
-- **One daily budget** of `min(90, available minutes)`. Aerobic takes from it first. Strength needs at least 15 min left, balance at least 10. If time limits aerobic below 10 min, no aerobic item is added and `limitedByAvailableTime` is set.
+- **One daily budget** of `min(90, available minutes)`. Aerobic takes from it first. Strength needs at least 15 min left, balance at least 10. If time limits aerobic below 10 min, no aerobic item is added and `limitedByAvailableTime` is set. `limitedByAvailableTime` is also set (once, never duplicated) when a due strength or balance session is dropped because the budget is used up.
+- **Session cap.** The aerobic item's actual minutes (after halving for vigorous) never exceed `maxSessionMinutes` clamped to 10 to 90; `cappedAtSessionMaximum` when it binds. Strength (15 to 25) and balance (10 to 15) keep their fixed lengths.
+- **No silent empty plans.** When aerobic minutes are due but no activity is usable (for example seated-only without a stationary bike), the plan carries `noSuitableActivity`.
 - **Weekly aerobic goal.** Performance: 300. Gradual loss: the activity share of the deficit (share clamped to 0 to 0.5, deficit to 0 to 500 kcal) converted to minutes and bounded to 150 to 300. Everything else: 150.
 - **Progression.** No history: start level, capped at the goal. With history: max(60, floor-to-5 of previous week x 1.10), capped at the goal. `progressingGradually` is set when the week is below the goal, and also when the catch-up spike cap trims today's minutes.
 - **Strength** is skipped when the week's sessions are met, or when strength was done yesterday and there are more days left than sessions still owed. Strength is never vigorous.
@@ -108,8 +111,7 @@ Product choices, not taken from the guidelines above: the +10% weekly progressio
 
 ## Known limitations
 
-- `PlanNotice.cappedAtDailyMaximum` is currently unreachable: the spike cap keeps aerobic minutes at 90 or below.
-- The clearance plan ignores available time and does not add the underweight notice.
-- Outside the clearance path, a seated-only user without a stationary bike gets an empty plan with no notice explaining it. (The clearance path carries `clinicianClearanceRecommended`.)
+- The clearance plan does not add the underweight notice.
+- `maxSessionMinutes` caps aerobic items only: with a cap below 25 min, a strength item (15 to 25 min) can still be longer than the cap.
 - `weekly.strengthSessions` uses the profile's goal before the underweight remap (an underweight performance user shows 3, not 2).
 - Loss-goal weekly minutes use the primary activity's moderate MET (gross, resting energy not subtracted), even when light is prescribed.

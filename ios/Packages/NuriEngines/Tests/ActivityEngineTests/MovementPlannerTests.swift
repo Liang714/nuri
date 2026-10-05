@@ -45,6 +45,71 @@ import NutritionEngine
         #expect(p.notices == [.clinicianClearanceRecommended])
     }
 
+    @Test func clearancePlanRespectsAvailableTime() throws {
+        let none = plan {
+            $0.readiness = ReadinessScreen(yesAnswers: [.heartCondition])
+            $0.availableMinutesToday = 5
+        }
+        #expect(none.items.isEmpty)
+        #expect(none.notices == [.clinicianClearanceRecommended, .limitedByAvailableTime])
+
+        let short = plan {
+            $0.readiness = ReadinessScreen(yesAnswers: [.heartCondition])
+            $0.availableMinutesToday = 15
+        }
+        let a = try #require(short.items.first)
+        #expect(a.minutesLow == 10 && a.minutesHigh == 15)
+        #expect(short.notices == [.clinicianClearanceRecommended, .limitedByAvailableTime])
+    }
+
+    @Test func clearancePlanRespectsSessionCap() throws {
+        let p = plan {
+            $0.readiness = ReadinessScreen(yesAnswers: [.heartCondition])
+            $0.maxSessionMinutes = 10
+        }
+        let a = try #require(p.items.first)
+        #expect(a.minutesLow == 10 && a.minutesHigh == 10)
+        #expect(p.notices == [.clinicianClearanceRecommended, .cappedAtSessionMaximum])
+    }
+
+    @Test func clearancePlanWithoutUsableActivityExplainsWhy() {
+        let p = plan {
+            $0.readiness = ReadinessScreen(yesAnswers: [.heartCondition])
+            $0.mobility = [.seatedOnly] // no stationary bike
+        }
+        #expect(p.items.isEmpty)
+        #expect(p.notices == [.clinicianClearanceRecommended, .noSuitableActivity])
+    }
+
+    @Test func seatedWithoutEquipmentGetsNoSuitableActivityNotice() {
+        let p = plan { $0.mobility = [.seatedOnly] }
+        #expect(p.items.isEmpty)
+        #expect(p.notices.contains(.noSuitableActivity))
+    }
+
+    @Test func strengthDroppedForTimeIsExplained() throws {
+        // 25–30 min aerobic uses the whole 30 minutes, so the due strength session does not fit.
+        let p = plan { $0.availableMinutesToday = 30 }
+        let a = try #require(aerobic(p))
+        #expect(a.minutesLow == 25 && a.minutesHigh == 30)
+        #expect(!p.items.contains { $0.kind == .strength })
+        #expect(p.notices.contains(.limitedByAvailableTime))
+    }
+
+    @Test func balanceDroppedForTimeIsExplained() throws {
+        // Age 70, 50 min: aerobic 25–30, strength 15–20, then no time for balance.
+        let p = plan { $0.profile.ageYears = 70; $0.availableMinutesToday = 50 }
+        let s = try #require(p.items.first { $0.kind == .strength })
+        #expect(s.minutesLow == 15 && s.minutesHigh == 20)
+        #expect(!p.items.contains { $0.kind == .balance })
+        #expect(p.notices == [.limitedByAvailableTime])
+    }
+
+    @Test func limitedByAvailableTimeIsNeverDuplicated() {
+        let p = plan { $0.availableMinutesToday = 20; $0.daysRemainingInWeekIncludingToday = 2 }
+        #expect(p.notices.filter { $0 == .limitedByAvailableTime }.count == 1)
+    }
+
     @Test func underweightNeverGetsLossPlan() {
         let p = plan {
             $0.profile = BodyProfile(ageYears: 25, sex: .female, heightCm: 170, weightKg: 45,
@@ -81,11 +146,59 @@ import NutritionEngine
             $0.daysRemainingInWeekIncludingToday = 1
             $0.week.previousWeekModerateEquivalentMinutes = 300
         }
+        // 300 owed on the last day → spike cap 90 → default 60-minute session cap → 55–60.
         let a = try #require(aerobic(p))
         #expect(a.activityId == "walking" && a.intensity == .moderate && a.met == 3.5)
-        #expect(a.minutesLow == 80 && a.minutesHigh == 90)
-        #expect(!p.items.contains { $0.kind == .strength })
+        #expect(a.minutesLow == 55 && a.minutesHigh == 60)
+        #expect(p.notices.contains(.cappedAtSessionMaximum))
+        let s = try #require(p.items.first { $0.kind == .strength })
+        #expect(s.minutesLow == 15 && s.minutesHigh == 25)
         #expect(p.items.map(\.minutesHigh).reduce(0, +) <= MovementPlanner.dailyMaxMinutes)
+    }
+
+    @Test func sessionCapIsClampedTo10Through90() throws {
+        func lastDayWalking(maxSession: Int) throws -> MovementPlan {
+            plan {
+                $0.profile.activityLevel = .veryActive
+                $0.profile.goal = .performance
+                $0.preferredActivityIds = ["walking"]
+                $0.daysRemainingInWeekIncludingToday = 1
+                $0.week.previousWeekModerateEquivalentMinutes = 300
+                $0.maxSessionMinutes = maxSession
+            }
+        }
+        let low = try lastDayWalking(maxSession: 5) // treated as 10
+        let a = try #require(aerobic(low))
+        #expect(a.minutesLow == 10 && a.minutesHigh == 10)
+        #expect(low.notices.contains(.cappedAtSessionMaximum))
+
+        let high = try lastDayWalking(maxSession: 120) // treated as 90; the spike cap (90) does not exceed it
+        let b = try #require(aerobic(high))
+        #expect(b.minutesLow == 80 && b.minutesHigh == 90)
+        #expect(!high.notices.contains(.cappedAtSessionMaximum))
+        #expect(high.items.map(\.minutesHigh).reduce(0, +) <= MovementPlanner.dailyMaxMinutes)
+    }
+
+    @Test func sessionCapAppliesToActualVigorousMinutes() throws {
+        func lastDayRunning(maxSession: Int) -> MovementPlan {
+            plan {
+                $0.profile.activityLevel = .veryActive
+                $0.profile.goal = .performance
+                $0.preferredActivityIds = ["running"]
+                $0.daysRemainingInWeekIncludingToday = 1
+                $0.week.previousWeekModerateEquivalentMinutes = 300
+                $0.maxSessionMinutes = maxSession
+            }
+        }
+        // 90 moderate-equivalent → 45 vigorous minutes, which fits a 45-minute session.
+        let fits = try #require(aerobic(lastDayRunning(maxSession: 45)))
+        #expect(fits.intensity == .vigorous && fits.minutesLow == 40 && fits.minutesHigh == 45)
+        #expect(!lastDayRunning(maxSession: 45).notices.contains(.cappedAtSessionMaximum))
+        // A 30-minute session cap binds on the 45 vigorous minutes.
+        let capped = lastDayRunning(maxSession: 30)
+        let c = try #require(aerobic(capped))
+        #expect(c.minutesLow == 25 && c.minutesHigh == 30)
+        #expect(capped.notices.contains(.cappedAtSessionMaximum))
     }
 
     @Test func olderAdultDayTotalWithin90() throws {

@@ -52,12 +52,15 @@ public struct MovementPlanInput: Sendable {
     /// values as `adjustmentKcal` to `EnergyTargetCalculator.estimate`.
     public var activityShareOfDeficit: Double
     public var sensitiveMode: Bool
+    /// The user's longest suggested session (spec §4 `max_suggested_session_minutes`, default 60).
+    /// Clamped to 10…90 when used. Caps every aerobic item, including the clearance plan's.
+    public var maxSessionMinutes: Int
 
     public init(profile: BodyProfile, bmiStandard: BMIStandard, readiness: ReadinessScreen = .init(yesAnswers: []),
                 preferredActivityIds: [String] = [], equipment: Set<String> = [], mobility: Set<MobilityPreference> = [],
                 availableMinutesToday: Int? = nil, week: WeeklyActivitySummary = .init(),
                 daysRemainingInWeekIncludingToday: Int = 7, lossDeficitKcal: Double = 250,
-                activityShareOfDeficit: Double = 0.5, sensitiveMode: Bool = false) {
+                activityShareOfDeficit: Double = 0.5, sensitiveMode: Bool = false, maxSessionMinutes: Int = 60) {
         self.profile = profile
         self.bmiStandard = bmiStandard
         self.readiness = readiness
@@ -70,6 +73,7 @@ public struct MovementPlanInput: Sendable {
         self.lossDeficitKcal = lossDeficitKcal
         self.activityShareOfDeficit = activityShareOfDeficit
         self.sensitiveMode = sensitiveMode
+        self.maxSessionMinutes = maxSessionMinutes
     }
 }
 
@@ -87,8 +91,15 @@ public struct PlanItem: Equatable, Sendable {
 }
 
 public enum PlanNotice: String, Sendable {
-    case clinicianClearanceRecommended, underweightNoLossPlan, cappedAtDailyMaximum,
-         limitedByAvailableTime, weeklyGoalReached, progressingGradually, lowImpactSelected
+    case clinicianClearanceRecommended, underweightNoLossPlan
+    /// The user's session cap (`MovementPlanInput.maxSessionMinutes`) shortened the aerobic item.
+    case cappedAtSessionMaximum
+    /// The day's budget (available minutes, at most 90) shortened or dropped the aerobic item,
+    /// or dropped a strength or balance session that was due. Appears at most once.
+    case limitedByAvailableTime
+    case weeklyGoalReached, progressingGradually, lowImpactSelected
+    /// Aerobic minutes are due but no catalog activity fits the user's equipment, mobility and safety gates.
+    case noSuitableActivity
 }
 
 /// Evidence shown in the "why this plan" drawer.

@@ -4,6 +4,10 @@ import NutritionEngine
 public enum MovementPlanner {
     public static let dailyMaxMinutes = 90
     public static let minimumSessionMinutes = 10
+    /// `MovementPlanInput.maxSessionMinutes` is clamped to this range.
+    public static let sessionCapRange = 10...90
+    /// Longest clearance-plan item (light activity while clinician clearance is pending).
+    public static let clearanceMaxMinutes = 20
     public static let whoBaseWeeklyMinutes = 150
     public static let whoUpperWeeklyMinutes = 300
 
@@ -72,11 +76,19 @@ public enum MovementPlanner {
         let strengthGoal = strengthSessionsGoal(goal: p.goal)
         let balanceGoal = balanceSessionsGoal(ageYears: p.ageYears)
 
+        // One daily budget shared by every item: never above 90 min, never above the time the user has.
+        var budget = Double(min(dailyMaxMinutes, input.availableMinutesToday ?? dailyMaxMinutes))
+        let sessionCap = Double(min(sessionCapRange.upperBound, max(sessionCapRange.lowerBound, input.maxSessionMinutes)))
+
         if input.readiness.needsClearance {
-            return clearancePlan(input, catalog: catalog, strengthGoal: strengthGoal, balanceGoal: balanceGoal)
+            return clearancePlan(input, catalog: catalog, budget: budget, sessionCap: sessionCap,
+                                 strengthGoal: strengthGoal, balanceGoal: balanceGoal)
         }
 
         var notices: [PlanNotice] = []
+        func noteLimitedByTime() {
+            if !notices.contains(.limitedByAvailableTime) { notices.append(.limitedByAvailableTime) }
+        }
         var rationale: [PlanRationale] = [.whoPhysicalActivity2020]
         let days = Double(max(1, min(7, input.daysRemainingInWeekIncludingToday)))
 
@@ -111,8 +123,6 @@ public enum MovementPlanner {
         }
 
         var items: [PlanItem] = []
-        // One daily budget shared by every item: never above 90 min, never above the time the user has.
-        var budget = Double(min(dailyMaxMinutes, input.availableMinutesToday ?? dailyMaxMinutes))
 
         let remaining = max(0, Double(thisWeek) - input.week.moderateEquivalentMinutes)
         if remaining <= 0 {
@@ -126,47 +136,56 @@ public enum MovementPlanner {
                 moderateMinutes = spikeCap
                 if !notices.contains(.progressingGradually) { notices.append(.progressingGradually) }
             }
-            if moderateMinutes > Double(dailyMaxMinutes) {
-                moderateMinutes = Double(dailyMaxMinutes)
-                notices.append(.cappedAtDailyMaximum)
-            }
+            // The spike cap keeps moderate-equivalent minutes at 90 or below (this week's target is at most 300),
+            // and the budget keeps the day total at 90 or below, so no separate daily-maximum check is needed.
             // WHO: one minute at >= 6 MET counts as two moderate minutes, so the item is halved.
             var minutes = prescription.met >= 6 ? moderateMinutes / 2 : moderateMinutes
+            if minutes > sessionCap {
+                minutes = sessionCap
+                notices.append(.cappedAtSessionMaximum)
+            }
             var limitedByBudget = false
             if minutes > budget {
-                // Aerobic minutes never exceed 90, so only the available time can bind the budget here.
                 minutes = budget
                 limitedByBudget = true
-                notices.append(.limitedByAvailableTime)
+                noteLimitedByTime()
             }
             if !(limitedByBudget && minutes < Double(minimumSessionMinutes)) {
                 let item = makeItem(.aerobic, activity: activity, met: prescription.met,
-                                    minutes: minutes, cap: budget, input: input)
+                                    minutes: minutes, cap: min(budget, sessionCap), input: input)
                 items.append(item)
                 budget -= Double(item.minutesHigh)
             }
+        } else {
+            notices.append(.noSuitableActivity)
         }
 
         let strengthRemaining = strengthGoal - input.week.strengthSessions
         if strengthRemaining > 0,
            strengthRemaining >= Int(days) || !input.week.didStrengthYesterday,
-           budget >= 15,
            let activity = choose(.strength, input: input, catalog: catalog, requireLowImpact: requireLowImpact,
                                  allowVigorous: false),
            let met = activity.met.moderate {
-            let high = Int(min(25, budget))
-            items.append(fixedItem(.strength, activity: activity, met: met, low: 15, high: high, input: input))
-            budget -= Double(high)
+            if budget >= 15 {
+                let high = Int(min(25, budget))
+                items.append(fixedItem(.strength, activity: activity, met: met, low: 15, high: high, input: input))
+                budget -= Double(high)
+            } else {
+                noteLimitedByTime()
+            }
         }
 
         if balanceGoal - input.week.balanceSessions > 0,
            !input.mobility.contains(.seatedOnly),
-           budget >= 10,
            let activity = catalog.activity(id: "tai_chi"),
            let met = activity.met.light {
-            let high = Int(min(15, budget))
-            items.append(fixedItem(.balance, activity: activity, met: met, low: 10, high: high, input: input))
-            budget -= Double(high)
+            if budget >= 10 {
+                let high = Int(min(15, budget))
+                items.append(fixedItem(.balance, activity: activity, met: met, low: 10, high: high, input: input))
+                budget -= Double(high)
+            } else {
+                noteLimitedByTime()
+            }
         }
 
         if !input.sensitiveMode && !items.isEmpty { rationale.append(.metCompendium) }
@@ -182,22 +201,39 @@ public enum MovementPlanner {
 
     // MARK: - Helpers
 
-    private static func clearancePlan(_ input: MovementPlanInput, catalog: METCatalog,
-                                      strengthGoal: Int, balanceGoal: Int) -> MovementPlan {
+    /// Minutes-only light plan while clinician clearance is pending: one 10–20 min item, within the daily budget
+    /// and the session cap. Below 10 min of budget there is no item and `limitedByAvailableTime` is added.
+    private static func clearancePlan(_ input: MovementPlanInput, catalog: METCatalog, budget: Double,
+                                      sessionCap: Double, strengthGoal: Int, balanceGoal: Int) -> MovementPlan {
+        var notices: [PlanNotice] = [.clinicianClearanceRecommended]
+        var items: [PlanItem] = []
         let seated = input.mobility.contains(.seatedOnly)
         let activityId = seated ? "cycling_stationary" : "walking"
-        var items: [PlanItem] = []
-        if let activity = catalog.activity(id: activityId),
-           Set(activity.equipment).isSubset(of: input.equipment),
-           let met = activity.met.light {
+        if budget < Double(minimumSessionMinutes) {
+            notices.append(.limitedByAvailableTime)
+        } else if let activity = catalog.activity(id: activityId),
+                  Set(activity.equipment).isSubset(of: input.equipment),
+                  let met = activity.met.light {
+            var high = Double(clearanceMaxMinutes)
+            if sessionCap < high {
+                high = sessionCap
+                notices.append(.cappedAtSessionMaximum)
+            }
+            if budget < high {
+                high = budget
+                notices.append(.limitedByAvailableTime)
+            }
+            let low = min(Double(minimumSessionMinutes), high)
             items.append(PlanItem(kind: .aerobic, activityId: activity.id, intensity: Intensity.forMET(met), met: met,
-                                  minutesLow: 10, minutesHigh: 20, kcal: nil))
+                                  minutesLow: Int(low), minutesHigh: Int(high), kcal: nil))
+        } else {
+            notices.append(.noSuitableActivity)
         }
         return MovementPlan(
             items: items,
             weekly: WeeklyTargets(goalMinutes: whoBaseWeeklyMinutes, thisWeekMinutes: 0,
                                   strengthSessions: strengthGoal, balanceSessions: balanceGoal),
-            notices: [.clinicianClearanceRecommended],
+            notices: notices,
             rationale: [.whoPhysicalActivity2020]
         )
     }
@@ -229,9 +265,9 @@ public enum MovementPlanner {
         return eligible.first { $0.id == fallbackId } ?? eligible.first
     }
 
+    /// `cap` is the smaller of the remaining budget and the session cap; neither bound can be exceeded.
     private static func makeItem(_ kind: PlanItemKind, activity: ActivityType, met: Double,
-                                 minutes: Double, cap: Double?, input: MovementPlanInput) -> PlanItem {
-        let upper = min(Double(dailyMaxMinutes), cap ?? .infinity)
+                                 minutes: Double, cap upper: Double, input: MovementPlanInput) -> PlanItem {
         let low = max(5, min(upper, roundTo(minutes * 0.9, step: 5)))
         let high = max(low, min(upper, roundTo(minutes * 1.1, step: 5)))
         return PlanItem(kind: kind, activityId: activity.id, intensity: Intensity.forMET(met), met: met,
