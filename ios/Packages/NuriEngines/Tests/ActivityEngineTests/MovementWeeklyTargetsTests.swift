@@ -37,6 +37,9 @@ import NuriDomain
         #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 150, level: .sedentary, previousWeek: 200) == 150)
         #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 215, level: .moderatelyActive, previousWeek: nil) == 150)
         #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 215, level: .moderatelyActive, previousWeek: 200) == 215)
+        // Starting dose is a floor only for beginners: growth above it is capped at +10%/week.
+        #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 150, level: .moderatelyActive, previousWeek: 30) == 60)
+        #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 300, level: .veryActive, previousWeek: 104) == 110)
     }
 
     @Test func strengthAndBalanceGoals() {

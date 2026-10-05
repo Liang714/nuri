@@ -73,14 +73,117 @@ import NutritionEngine
         #expect(!p.rationale.contains(.metCompendium))
     }
 
-    @Test func dailyCapIs90Minutes() throws {
+    @Test func dayTotalNeverExceeds90Minutes() throws {
         let p = plan {
+            $0.profile.activityLevel = .veryActive
+            $0.profile.goal = .performance
+            $0.preferredActivityIds = ["walking"]
             $0.daysRemainingInWeekIncludingToday = 1
             $0.week.previousWeekModerateEquivalentMinutes = 300
         }
         let a = try #require(aerobic(p))
-        #expect(a.minutesHigh <= MovementPlanner.dailyMaxMinutes)
-        #expect(p.notices.contains(.cappedAtDailyMaximum))
+        #expect(a.activityId == "walking" && a.intensity == .moderate && a.met == 3.5)
+        #expect(a.minutesLow == 80 && a.minutesHigh == 90)
+        #expect(!p.items.contains { $0.kind == .strength })
+        #expect(p.items.map(\.minutesHigh).reduce(0, +) <= MovementPlanner.dailyMaxMinutes)
+    }
+
+    @Test func olderAdultDayTotalWithin90() throws {
+        let p = plan { $0.profile.ageYears = 70 }
+        let a = try #require(aerobic(p))
+        #expect(a.minutesLow == 25 && a.minutesHigh == 30)
+        let s = try #require(p.items.first { $0.kind == .strength })
+        #expect(s.minutesLow == 15 && s.minutesHigh == 25)
+        let b = try #require(p.items.first { $0.kind == .balance })
+        #expect(b.minutesLow == 10 && b.minutesHigh == 15)
+        #expect(p.items.map(\.minutesHigh).reduce(0, +) <= MovementPlanner.dailyMaxMinutes)
+    }
+
+    @Test func sedentaryPreferringRunningGetsNonVigorousActivity() throws {
+        let p = plan {
+            $0.profile.activityLevel = .sedentary
+            $0.preferredActivityIds = ["running"]
+        }
+        let a = try #require(aerobic(p))
+        #expect(a.activityId == "walking")
+        #expect(a.met < 6)
+        #expect(a.intensity != .vigorous)
+    }
+
+    @Test func lightlyActiveCyclistGetsLightIntensityBelow6MET() throws {
+        let p = plan {
+            $0.profile.activityLevel = .lightlyActive
+            $0.preferredActivityIds = ["cycling_outdoor"]
+            $0.equipment = ["bicycle"]
+        }
+        let a = try #require(aerobic(p))
+        #expect(a.activityId == "cycling_outdoor" && a.intensity == .light && a.met == 4.0)
+    }
+
+    @Test func obeseStationaryCyclistStaysBelow6MET() throws {
+        let p = plan {
+            $0.profile.heightCm = 170
+            $0.profile.weightKg = 80
+            $0.bmiStandard = .asianPacific
+            $0.preferredActivityIds = ["cycling_stationary"]
+            $0.equipment = ["stationary_bike"]
+        }
+        let a = try #require(aerobic(p))
+        #expect(a.activityId == "cycling_stationary" && a.met == 3.5 && a.intensity == .light)
+    }
+
+    @Test func performanceWalkingIsModerateNotVigorous() throws {
+        let p = plan {
+            $0.profile.activityLevel = .veryActive
+            $0.profile.goal = .performance
+        }
+        let a = try #require(aerobic(p))
+        #expect(a.activityId == "walking" && a.intensity == .moderate && a.met == 3.5)
+    }
+
+    @Test func underweightPerformanceGetsMaintenancePlan() throws {
+        let p = plan {
+            $0.profile = BodyProfile(ageYears: 25, sex: .female, heightCm: 170, weightKg: 45,
+                                     activityLevel: .moderatelyActive, goal: .performance)
+            $0.preferredActivityIds = ["running"]
+        }
+        #expect(p.notices.contains(.underweightNoLossPlan))
+        #expect(p.weekly.goalMinutes == 150)
+        let a = try #require(aerobic(p))
+        #expect(a.activityId == "walking")
+        #expect(!p.items.contains { $0.intensity == .vigorous })
+    }
+
+    @Test func underweightMaintainGetsClinicianNotice() {
+        let p = plan {
+            $0.profile = BodyProfile(ageYears: 25, sex: .female, heightCm: 170, weightKg: 45,
+                                     activityLevel: .moderatelyActive, goal: .maintain)
+        }
+        #expect(p.notices.contains(.underweightNoLossPlan))
+    }
+
+    @Test func lastDayDoesNotSpike() throws {
+        let p = plan {
+            $0.profile.activityLevel = .sedentary
+            $0.daysRemainingInWeekIncludingToday = 1
+        }
+        let a = try #require(aerobic(p))
+        #expect(a.minutesHigh <= 20)
+        #expect(p.notices.contains(.progressingGradually))
+    }
+
+    @Test func tinyAvailableTimeGivesNoAerobicItem() {
+        let p = plan { $0.availableMinutesToday = 3 }
+        #expect(aerobic(p) == nil)
+        #expect(p.notices.contains(.limitedByAvailableTime))
+        #expect(!p.items.contains { $0.kind == .strength || $0.kind == .balance })
+    }
+
+    @Test func daysRemainingOutOfRangeIsClamped() {
+        let zero = plan { $0.daysRemainingInWeekIncludingToday = 0 }
+        let one = plan { $0.daysRemainingInWeekIncludingToday = 1 }
+        #expect(aerobic(zero) != nil)
+        #expect(aerobic(zero) == aerobic(one))
     }
 
     @Test func availableTimeLimitsPlanAndSkipsStrength() throws {

@@ -34,11 +34,15 @@ public enum MovementPlanner {
         }
     }
 
-    /// Ramp toward the goal, increasing at most 10% over last week.
+    /// Ramp toward the goal. 60 min/week is the beginner dose; above it, growth is capped at +10% over last week
+    /// (rounded down to 5 min so rounding can never exceed the cap).
     public static func effectiveWeeklyMinutes(goal: Int, level: ActivityLevel, previousWeek: Double?) -> Int {
-        let start = Double(startingWeeklyMinutes(for: level))
-        let ramp = previousWeek.map { max(start, roundTo($0 * 1.10, step: 5)) } ?? start
-        return Int(min(Double(goal), ramp))
+        guard let previousWeek else {
+            return min(goal, startingWeeklyMinutes(for: level))
+        }
+        // The epsilon absorbs binary floating-point error (e.g. 50 × 1.1) without changing any realistic input.
+        let grown = (previousWeek * 1.10 / 5 + 1e-9).rounded(.down) * 5
+        return min(goal, Int(max(60, grown)))
     }
 
     public static func strengthSessionsGoal(goal: Goal) -> Int {
@@ -63,16 +67,21 @@ public enum MovementPlanner {
 
         var notices: [PlanNotice] = []
         var rationale: [PlanRationale] = [.whoPhysicalActivity2020]
+        let days = Double(max(1, min(7, input.daysRemainingInWeekIncludingToday)))
 
+        // Underweight: never a loss or performance (vigorous) plan, whatever the goal.
         var goal = p.goal
-        if goal == .gradualLoss && bmiCategory == .underweight {
-            goal = .maintain
+        let underweight = bmiCategory == .underweight
+        if underweight {
             notices.append(.underweightNoLossPlan)
+            if goal == .gradualLoss || goal == .performance { goal = .maintain }
         }
 
         let requireLowImpact = bmiCategory == .obese
-        let allowVigorous = p.activityLevel >= .moderatelyActive && bmiCategory != .obese && goal == .performance
-        let aerobicChoice = choose(.aerobic, input: input, catalog: catalog, requireLowImpact: requireLowImpact)
+        let allowVigorous = p.activityLevel >= .moderatelyActive && bmiCategory != .obese
+            && !underweight && goal == .performance
+        let aerobicChoice = choose(.aerobic, input: input, catalog: catalog, requireLowImpact: requireLowImpact,
+                                   allowVigorous: allowVigorous)
         if requireLowImpact, aerobicChoice != nil,
            input.preferredActivityIds.contains(where: { id in catalog.activity(id: id).map { !$0.isLowImpact } ?? false }) {
             notices.append(.lowImpactSelected)
@@ -91,52 +100,63 @@ public enum MovementPlanner {
         }
 
         var items: [PlanItem] = []
-        var minutesLeftToday = input.availableMinutesToday.map { Double($0) }
+        // One daily budget shared by every item: never above 90 min, never above the time the user has.
+        var budget = Double(min(dailyMaxMinutes, input.availableMinutesToday ?? dailyMaxMinutes))
 
         let remaining = max(0, Double(thisWeek) - input.week.moderateEquivalentMinutes)
         if remaining <= 0 {
             notices.append(.weeklyGoalReached)
-        } else if let activity = aerobicChoice {
-            let days = Double(max(1, min(7, input.daysRemainingInWeekIncludingToday)))
+        } else if let activity = aerobicChoice,
+                  let prescription = aerobicPrescription(for: activity, allowVigorous: allowVigorous) {
             var moderateMinutes = max(Double(minimumSessionMinutes), ceilTo(remaining / days, step: 5))
+            // No catch-up spikes: a single day never carries more than about two days' worth of the weekly target.
+            let spikeCap = ceilTo(2 * Double(thisWeek) / 7, step: 5)
+            if moderateMinutes > spikeCap {
+                moderateMinutes = spikeCap
+                if !notices.contains(.progressingGradually) { notices.append(.progressingGradually) }
+            }
             if moderateMinutes > Double(dailyMaxMinutes) {
                 moderateMinutes = Double(dailyMaxMinutes)
                 notices.append(.cappedAtDailyMaximum)
             }
-            let intensity: Intensity = (allowVigorous && activity.met.vigorous != nil) ? .vigorous : .moderate
-            let met = activity.met.value(for: intensity) ?? activity.met.light ?? primaryModerateMET
-            var minutes = met >= 6 && intensity == .vigorous ? moderateMinutes / 2 : moderateMinutes
-            if let available = minutesLeftToday, minutes > available {
-                minutes = available
+            var minutes = prescription.intensity == .vigorous ? moderateMinutes / 2 : moderateMinutes
+            var limitedByBudget = false
+            if minutes > budget {
+                // Aerobic minutes never exceed 90, so only the available time can bind the budget here.
+                minutes = budget
+                limitedByBudget = true
                 notices.append(.limitedByAvailableTime)
             }
-            if minutes > 0 {
-                let item = makeItem(.aerobic, activity: activity, intensity: intensity, met: met,
-                                    minutes: minutes, cap: minutesLeftToday, input: input)
+            if !(limitedByBudget && minutes < Double(minimumSessionMinutes)) {
+                let item = makeItem(.aerobic, activity: activity, intensity: prescription.intensity,
+                                    met: prescription.met, minutes: minutes, cap: budget, input: input)
                 items.append(item)
-                minutesLeftToday = minutesLeftToday.map { $0 - Double(item.minutesHigh) }
+                budget -= Double(item.minutesHigh)
             }
         }
 
         let strengthRemaining = strengthGoal - input.week.strengthSessions
-        let daysLeft = max(1, input.daysRemainingInWeekIncludingToday)
         if strengthRemaining > 0,
-           strengthRemaining >= daysLeft || !input.week.didStrengthYesterday,
-           (minutesLeftToday ?? .infinity) >= 15,
-           let activity = choose(.strength, input: input, catalog: catalog, requireLowImpact: requireLowImpact),
+           strengthRemaining >= Int(days) || !input.week.didStrengthYesterday,
+           budget >= 15,
+           let activity = choose(.strength, input: input, catalog: catalog, requireLowImpact: requireLowImpact,
+                                 allowVigorous: false),
            let met = activity.met.moderate {
+            let high = Int(min(25, budget))
             items.append(fixedItem(.strength, activity: activity, intensity: .moderate, met: met,
-                                   low: 15, high: 25, input: input))
-            minutesLeftToday = minutesLeftToday.map { $0 - 25 }
+                                   low: 15, high: high, input: input))
+            budget -= Double(high)
         }
 
         if balanceGoal - input.week.balanceSessions > 0,
            !input.mobility.contains(.seatedOnly),
-           (minutesLeftToday ?? .infinity) >= 10,
+           budget >= 10,
            let activity = catalog.activity(id: "tai_chi"),
            let met = activity.met.light {
+            let high = Int(min(15, budget))
             items.append(fixedItem(.balance, activity: activity, intensity: .light, met: met,
-                                   low: 10, high: 15, input: input))
+                                   low: 10, high: high, input: input))
+            budget -= Double(high)
         }
 
         if !input.sensitiveMode && !items.isEmpty { rationale.append(.metCompendium) }
@@ -172,11 +192,25 @@ public enum MovementPlanner {
         )
     }
 
+    /// Intensity follows the MET value, not the catalog label: an item is vigorous iff its MET is ≥ 6
+    /// (WHO / Compendium), and only when vigorous work is allowed for this user. Otherwise the first of
+    /// moderate / light that stays below 6 MET is used. Nil when the activity has no safe intensity for the user.
+    private static func aerobicPrescription(for activity: ActivityType,
+                                            allowVigorous: Bool) -> (intensity: Intensity, met: Double)? {
+        if allowVigorous, let met = activity.met.vigorous, met >= 6 { return (.vigorous, met) }
+        for intensity in [Intensity.moderate, .light] {
+            if let met = activity.met.value(for: intensity), met < 6 { return (intensity, met) }
+        }
+        return nil
+    }
+
     /// Preferred eligible activity first, then walking (aerobic) / bodyweight (strength), then catalog order.
+    /// Aerobic activities are only eligible when they have a safe intensity for the user.
     private static func choose(_ category: ActivityCategory, input: MovementPlanInput, catalog: METCatalog,
-                               requireLowImpact: Bool) -> ActivityType? {
+                               requireLowImpact: Bool, allowVigorous: Bool) -> ActivityType? {
         let eligible = catalog.eligible(category: category, equipment: input.equipment,
                                         mobility: input.mobility, requireLowImpact: requireLowImpact)
+            .filter { category != .aerobic || aerobicPrescription(for: $0, allowVigorous: allowVigorous) != nil }
         if let preferred = input.preferredActivityIds.lazy.compactMap({ id in eligible.first { $0.id == id } }).first {
             return preferred
         }
