@@ -57,7 +57,8 @@ public enum MovementPlanner {
         }
         // The epsilon absorbs binary floating-point error (e.g. 50 × 1.1) without changing any realistic input.
         let grown = (previousWeek * 1.10 / 5 + 1e-9).rounded(.down) * 5
-        return min(goal, Int(max(60, grown)))
+        // Compare in Double before converting, so an absurd or infinite history cannot trap.
+        return Int(min(Double(goal), max(60, grown)))
     }
 
     public static func strengthSessionsGoal(goal: Goal) -> Int {
@@ -69,11 +70,19 @@ public enum MovementPlanner {
         ageYears >= 65 ? 3 : 0
     }
 
-    public static func plan(_ input: MovementPlanInput, catalog: METCatalog) -> MovementPlan {
-        let p = input.profile
+    /// Validates the profile first (`BodyProfile.validated()`), so an out-of-range profile throws instead of
+    /// producing a plan.
+    public static func plan(_ input: MovementPlanInput,
+                            catalog: METCatalog) throws(ProfileValidationError) -> MovementPlan {
+        let p = try input.profile.validated()
         let bmi = BMI.value(weightKg: p.weightKg, heightCm: p.heightCm)
         let bmiCategory = BMI.category(for: bmi, standard: input.bmiStandard)
-        let strengthGoal = strengthSessionsGoal(goal: p.goal)
+
+        // Underweight: never a loss or performance (vigorous) plan, whatever the goal.
+        var goal = p.goal
+        let underweight = bmiCategory == .underweight
+        if underweight, goal == .gradualLoss || goal == .performance { goal = .maintain }
+        let strengthGoal = strengthSessionsGoal(goal: goal)
         let balanceGoal = balanceSessionsGoal(ageYears: p.ageYears)
 
         // One daily budget shared by every item: never above 90 min, never above the time the user has.
@@ -92,13 +101,7 @@ public enum MovementPlanner {
         var rationale: [PlanRationale] = [.whoPhysicalActivity2020]
         let days = Double(max(1, min(7, input.daysRemainingInWeekIncludingToday)))
 
-        // Underweight: never a loss or performance (vigorous) plan, whatever the goal.
-        var goal = p.goal
-        let underweight = bmiCategory == .underweight
-        if underweight {
-            notices.append(.underweightNoLossPlan)
-            if goal == .gradualLoss || goal == .performance { goal = .maintain }
-        }
+        if underweight { notices.append(.underweightNoLossPlan) }
 
         let requireLowImpact = bmiCategory == .obese
         let allowVigorous = p.activityLevel >= .moderatelyActive && bmiCategory != .obese
@@ -140,15 +143,18 @@ public enum MovementPlanner {
             // and the budget keeps the day total at 90 or below, so no separate daily-maximum check is needed.
             // WHO: one minute at >= 6 MET counts as two moderate minutes, so the item is halved.
             var minutes = prescription.met >= 6 ? moderateMinutes / 2 : moderateMinutes
-            if minutes > sessionCap {
-                minutes = sessionCap
-                notices.append(.cappedAtSessionMaximum)
-            }
+            // Shorten to the tighter of the session cap and the day's budget, and report the bound that binds
+            // (ties go to the available time).
             var limitedByBudget = false
-            if minutes > budget {
-                minutes = budget
-                limitedByBudget = true
-                noteLimitedByTime()
+            if minutes > min(sessionCap, budget) {
+                if sessionCap < budget {
+                    minutes = sessionCap
+                    notices.append(.cappedAtSessionMaximum)
+                } else {
+                    minutes = budget
+                    limitedByBudget = true
+                    noteLimitedByTime()
+                }
             }
             if !(limitedByBudget && minutes < Double(minimumSessionMinutes)) {
                 let item = makeItem(.aerobic, activity: activity, met: prescription.met,
@@ -214,14 +220,9 @@ public enum MovementPlanner {
         } else if let activity = catalog.activity(id: activityId),
                   Set(activity.equipment).isSubset(of: input.equipment),
                   let met = activity.met.light {
-            var high = Double(clearanceMaxMinutes)
-            if sessionCap < high {
-                high = sessionCap
-                notices.append(.cappedAtSessionMaximum)
-            }
-            if budget < high {
-                high = budget
-                notices.append(.limitedByAvailableTime)
+            let high = min(Double(clearanceMaxMinutes), sessionCap, budget)
+            if high < Double(clearanceMaxMinutes) {
+                notices.append(sessionCap < budget ? .cappedAtSessionMaximum : .limitedByAvailableTime)
             }
             let low = min(Double(minimumSessionMinutes), high)
             items.append(PlanItem(kind: .aerobic, activityId: activity.id, intensity: Intensity.forMET(met), met: met,

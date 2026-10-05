@@ -94,6 +94,8 @@ public enum ManualTargetAssessment: Equatable, Sendable {
 
 public enum EnergyTargetCalculator {
     /// Returns nil when no sex value is provided: the app offers manual target setup instead of assuming.
+    /// For gradual loss, pass `GoalAdjustmentPolicy.foodAdjustment(lossDeficitKcal:activityShare:)` as
+    /// `adjustmentKcal` so the food and activity parts of the deficit add up to at most 500 kcal/day.
     public static func estimate(profile: BodyProfile,
                                 adjustmentKcal: Double? = nil) throws(ProfileValidationError) -> EnergyTargetEstimate? {
         let p = try profile.validated()
@@ -103,9 +105,11 @@ public enum EnergyTargetCalculator {
                                                  ageYears: p.ageYears, sex: sex)
         let tdee = EnergyFormula.tdee(bmr: bmr, activityLevel: p.activityLevel)
 
-        let underweight = BMI.value(weightKg: p.weightKg, heightCm: p.heightCm) < 18.5
+        let underweight = BMI.value(weightKg: p.weightKg, heightCm: p.heightCm) < BMI.underweightCutoff
         let lossBlocked = p.goal == .gradualLoss && underweight
-        let requested = adjustmentKcal ?? GoalAdjustmentPolicy.defaultAdjustment(for: p.goal)
+        // A missing or non-finite request falls back to the goal's default (never to a clamp bound).
+        let requested = adjustmentKcal.flatMap { $0.isFinite ? $0 : nil }
+            ?? GoalAdjustmentPolicy.defaultAdjustment(for: p.goal)
         let adjustment = lossBlocked ? 0 : GoalAdjustmentPolicy.clamp(requested, for: p.goal)
 
         let minimum = LowTargetPolicy.recommendedMinimumKcal(sex: sex)

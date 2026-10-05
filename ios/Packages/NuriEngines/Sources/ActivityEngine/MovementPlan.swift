@@ -103,10 +103,11 @@ public struct PlanItem: Equatable, Sendable {
 
 public enum PlanNotice: String, Sendable {
     case clinicianClearanceRecommended, underweightNoLossPlan
-    /// The user's session cap (`MovementPlanInput.maxSessionMinutes`) shortened the aerobic item.
+    /// The user's session cap (`MovementPlanInput.maxSessionMinutes`) shortened the aerobic item
+    /// (it was tighter than the day's remaining budget).
     case cappedAtSessionMaximum
-    /// The day's budget (available minutes, at most 90) shortened or dropped the aerobic item,
-    /// or dropped a strength or balance session that was due. Appears at most once.
+    /// The day's budget (available minutes, at most 90) shortened or dropped the aerobic item (it was at least as
+    /// tight as the session cap), or dropped a strength or balance session that was due. Appears at most once.
     case limitedByAvailableTime
     case weeklyGoalReached, progressingGradually, lowImpactSelected
     /// Aerobic minutes are due but no catalog activity fits the user's equipment, mobility and safety gates.

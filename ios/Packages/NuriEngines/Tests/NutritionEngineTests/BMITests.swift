@@ -22,6 +22,9 @@ func approx(_ a: Double, _ b: Double, tol: Double = 0.01) -> Bool { abs(a - b) <
     }
 
     @Test func boundariesBelongToHigherCategory() {
+        #expect(BMI.underweightCutoff == 18.5)
+        #expect(BMI.category(for: BMI.underweightCutoff, standard: .asianPacific) == .normal)
+        #expect(BMI.category(for: BMI.underweightCutoff.nextDown, standard: .who) == .underweight)
         #expect(BMI.category(for: 18.5, standard: .who) == .normal)
         #expect(BMI.category(for: 25.0, standard: .who) == .overweight)
         #expect(BMI.category(for: 30.0, standard: .who) == .obese)

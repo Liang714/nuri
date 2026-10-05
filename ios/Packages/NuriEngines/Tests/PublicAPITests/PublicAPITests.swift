@@ -52,7 +52,7 @@ import ActivityEngine
         let catalog = try METCatalog.bundled()
         let profile = BodyProfile(ageYears: 30, sex: .female, heightCm: 165, weightKg: 60,
                                   activityLevel: .lightlyActive, goal: .maintain)
-        let plan = MovementPlanner.plan(MovementPlanInput(profile: profile, bmiStandard: .who), catalog: catalog)
+        let plan = try MovementPlanner.plan(MovementPlanInput(profile: profile, bmiStandard: .who), catalog: catalog)
         #expect(!plan.items.isEmpty)
 
         let input = EquivalentsInput(targetKcal: 200, weightKg: 60, preferredActivityIds: ["walking"],

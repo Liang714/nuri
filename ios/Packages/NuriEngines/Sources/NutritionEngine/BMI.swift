@@ -20,13 +20,17 @@ public enum BMICategory: String, Codable, Sendable, CaseIterable {
 }
 
 public enum BMI {
+    /// Below this BMI is underweight in both standards (WHO 2000). Shared by `category(for:standard:)`,
+    /// the energy-target loss block and the movement plan.
+    public static let underweightCutoff = 18.5
+
     public static func value(weightKg: Double, heightCm: Double) -> Double {
         let m = heightCm / 100
         return weightKg / (m * m)
     }
 
     public static func category(for bmi: Double, standard: BMIStandard) -> BMICategory {
-        if bmi < 18.5 { return .underweight }
+        if bmi < underweightCutoff { return .underweight }
         switch standard {
         case .who:
             if bmi < 25 { return .normal }

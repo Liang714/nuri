@@ -37,6 +37,24 @@ func approx(_ a: Double, _ b: Double, tol: Double = 0.01) -> Bool { abs(a - b) <
         #expect(!obese.contains("running"))
     }
 
+    @Test func plannerHardCodedActivitiesExistAndStrengthIsNeverVigorous() throws {
+        let c = try METCatalog.bundled()
+        for id in ["walking", "strength_bodyweight", "tai_chi", "cycling_stationary"] {
+            #expect(c.activity(id: id) != nil, "\(id)")
+        }
+        // Columns the planner reads directly: clearance (light walking / stationary cycling), balance, strength.
+        #expect(c.activity(id: "walking")?.met.light != nil)
+        #expect(c.activity(id: "cycling_stationary")?.met.light != nil)
+        #expect(c.activity(id: "tai_chi")?.met.light != nil)
+        #expect(c.activity(id: "strength_bodyweight")?.met.moderate != nil)
+        let strength = c.activities.filter { $0.category == .strength }
+        #expect(!strength.isEmpty)
+        for a in strength {
+            let met = try #require(a.met.moderate, "\(a.id)")
+            #expect(met < 6, "\(a.id)")
+        }
+    }
+
     @Test func intensityFollowsMETBand() {
         #expect(Intensity.forMET(2.99) == .light)
         #expect(Intensity.forMET(3.0) == .moderate)

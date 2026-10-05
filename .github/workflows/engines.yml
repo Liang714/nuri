@@ -1,7 +1,8 @@
 name: engines
 on:
-  push:
   pull_request:
+  push:
+    branches: [main]
 jobs:
   test:
     runs-on: macos-15

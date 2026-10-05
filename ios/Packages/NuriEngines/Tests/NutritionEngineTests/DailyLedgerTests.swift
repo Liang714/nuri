@@ -28,6 +28,12 @@ import NuriDomain
         #expect(l.creditedActivityKcal == 300)
     }
 
+    @Test func negativePartialCreditPercentCreditsNothing() {
+        let l = DailyLedger.compute(foodKcal: 1500, activityKcalBySource: activity, baseTargetKcal: 2000, mode: .partialCredit(percent: -50))
+        #expect(l.creditedActivityKcal == 0)
+        #expect(l.remainingKcal == 500)
+    }
+
     @Test func fullCredit() {
         let l = DailyLedger.compute(foodKcal: 1500, activityKcalBySource: activity, baseTargetKcal: 2000, mode: .fullCredit)
         #expect(l.remainingKcal == 800)

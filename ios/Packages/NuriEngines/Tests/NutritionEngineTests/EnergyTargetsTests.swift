@@ -59,6 +59,53 @@ import NuriDomain
         #expect(e.lossNotAppliedUnderweight)
     }
 
+    @Test func nonFiniteAdjustmentUsesTheGoalDefault() throws {
+        var p = male; p.goal = .gradualLoss
+        let nan = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: .nan))
+        #expect(nan.adjustmentKcal == -250)
+        let inf = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: -.infinity))
+        #expect(inf.adjustmentKcal == -250)
+    }
+
+    @Test func underweightIgnoresExplicitLossAdjustment() throws {
+        let p = BodyProfile(ageYears: 25, sex: .female, heightCm: 170, weightKg: 50,
+                            activityLevel: .lightlyActive, goal: .gradualLoss)
+        let e = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: -500))
+        #expect(e.adjustmentKcal == 0)
+        #expect(e.lossNotAppliedUnderweight)
+    }
+
+    @Test func bmiExactlyAtCutoffIsNotUnderweight() throws {
+        // 74 kg / (2.00 m)² = 18.5 exactly in binary floating point.
+        let p = BodyProfile(ageYears: 30, sex: .male, heightCm: 200, weightKg: 74,
+                            activityLevel: .moderatelyActive, goal: .gradualLoss)
+        #expect(BMI.value(weightKg: p.weightKg, heightCm: p.heightCm) == BMI.underweightCutoff)
+        let e = try #require(try EnergyTargetCalculator.estimate(profile: p))
+        #expect(e.adjustmentKcal == -250)
+        #expect(!e.lossNotAppliedUnderweight)
+    }
+
+    @Test func maleCalculatedTargetNeverBelow1500() throws {
+        // BMR 992.5, TDEE 1191; minus 500 would be 691.
+        let p = BodyProfile(ageYears: 80, sex: .male, heightCm: 150, weightKg: 45,
+                            activityLevel: .sedentary, goal: .gradualLoss)
+        let e = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: -500))
+        #expect(e.targetKcal == 1500)
+        #expect(e.raisedToMinimum)
+    }
+
+    @Test func gainIsClampedToPlus500() throws {
+        var p = male; p.goal = .gradualGain
+        let e = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: 900))
+        #expect(e.adjustmentKcal == 500)
+    }
+
+    @Test func positiveAdjustmentOnLossIsIgnored() throws {
+        var p = male; p.goal = .gradualLoss
+        let e = try #require(try EnergyTargetCalculator.estimate(profile: p, adjustmentKcal: 300))
+        #expect(e.adjustmentKcal == 0)
+    }
+
     @Test func noSexMeansManualSetup() throws {
         var p = male; p.sex = nil
         #expect(try EnergyTargetCalculator.estimate(profile: p) == nil)

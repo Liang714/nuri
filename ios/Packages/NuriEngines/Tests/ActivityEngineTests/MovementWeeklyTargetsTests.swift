@@ -50,6 +50,11 @@ import NuriDomain
         #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 300, level: .veryActive, previousWeek: 104) == 110)
     }
 
+    @Test func absurdPreviousWeekDoesNotTrap() {
+        #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 150, level: .sedentary, previousWeek: .infinity) == 150)
+        #expect(MovementPlanner.effectiveWeeklyMinutes(goal: 300, level: .veryActive, previousWeek: 1e300) == 300)
+    }
+
     @Test func strengthAndBalanceGoals() {
         #expect(MovementPlanner.strengthSessionsGoal(goal: .maintain) == 2)
         #expect(MovementPlanner.strengthSessionsGoal(goal: .gradualGain) == 3)
