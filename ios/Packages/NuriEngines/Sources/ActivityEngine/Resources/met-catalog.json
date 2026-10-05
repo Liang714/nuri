@@ -1,1 +1,17 @@
-{}
+{
+  "version": "nuri-met-2026.1",
+  "sourceReference": "Compendium of Physical Activities (Ainsworth et al., 2011; Herrmann et al., 2024 Adult Compendium)",
+  "activities": [
+    { "id": "walking", "category": "aerobic", "met": { "light": 2.8, "moderate": 3.5, "vigorous": 5.0 }, "equipment": [], "tags": ["low_impact"] },
+    { "id": "running", "category": "aerobic", "met": { "light": 7.0, "moderate": 8.3, "vigorous": 9.8 }, "equipment": [], "tags": ["high_impact"] },
+    { "id": "cycling_outdoor", "category": "aerobic", "met": { "light": 4.0, "moderate": 6.8, "vigorous": 8.0 }, "equipment": ["bicycle"], "tags": ["low_impact"] },
+    { "id": "cycling_stationary", "category": "aerobic", "met": { "light": 3.5, "moderate": 6.8, "vigorous": 8.8 }, "equipment": ["stationary_bike"], "tags": ["low_impact", "seated"] },
+    { "id": "swimming", "category": "aerobic", "met": { "light": 4.8, "moderate": 5.8, "vigorous": 9.8 }, "equipment": ["pool"], "tags": ["low_impact"] },
+    { "id": "elliptical", "category": "aerobic", "met": { "moderate": 5.0 }, "equipment": ["elliptical"], "tags": ["low_impact"] },
+    { "id": "dancing", "category": "aerobic", "met": { "moderate": 5.0, "vigorous": 7.3 }, "equipment": [], "tags": [] },
+    { "id": "strength_bodyweight", "category": "strength", "met": { "light": 2.8, "moderate": 3.8, "vigorous": 8.0 }, "equipment": [], "tags": ["low_impact"] },
+    { "id": "strength_weights", "category": "strength", "met": { "light": 3.5, "moderate": 5.0, "vigorous": 6.0 }, "equipment": ["weights"], "tags": ["low_impact"] },
+    { "id": "yoga", "category": "flexibility", "met": { "light": 2.5, "moderate": 3.0, "vigorous": 4.0 }, "equipment": [], "tags": ["low_impact"] },
+    { "id": "tai_chi", "category": "balance", "met": { "light": 3.0 }, "equipment": [], "tags": ["low_impact"] }
+  ]
+}
