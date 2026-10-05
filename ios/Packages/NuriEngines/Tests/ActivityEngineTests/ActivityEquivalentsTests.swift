@@ -67,15 +67,41 @@ import Testing
         #expect(options.allSatisfy { !$0.suggestSplitting })
     }
 
-    @Test func timeFitRankingPlacesShortDurationsFirst() {
+    @Test func exceedingAvailableTimeSuggestsSplitting() throws {
+        // running: 40-60 min (within the 60-minute cap); cycling_outdoor: 50-70 min.
         guard case .options(let options) = ActivityEquivalents.recommend(
-            input(kcal: 450, weight: 70, preferred: [], equipment: ["bicycle", "pool"], available: 60),
+            input(kcal: 450, weight: 70, preferred: ["running", "cycling_outdoor"],
+                  equipment: ["bicycle", "pool"], available: 45),
             catalog: catalog) else {
             Issue.record("expected options"); return
         }
-        let fitsTimeIdx = options.firstIndex { o in o.minutesLow <= 60 && o.activityId != "walking" } ?? Int.max
-        let exceedsTimeIdx = options.firstIndex { o in o.minutesLow > 60 && o.activityId != "walking" } ?? Int.max
-        #expect(fitsTimeIdx < exceedsTimeIdx)
+        let running = try #require(options.first { $0.activityId == "running" })
+        #expect(running.minutesLow == 40 && running.minutesHigh == 60)
+        #expect(!running.suggestSplitting)
+        let cycling = try #require(options.first { $0.activityId == "cycling_outdoor" })
+        #expect(cycling.minutesLow == 50 && cycling.minutesHigh == 70)
+        #expect(cycling.suggestSplitting)
+    }
+
+    @Test func availableTimeAloneTriggersSplitting() throws {
+        // running 40-60 min is within the 60-minute cap, so only the 35-minute window can trigger a split.
+        guard case .options(let options) = ActivityEquivalents.recommend(
+            input(kcal: 450, weight: 70, preferred: ["running"], equipment: [], available: 35),
+            catalog: catalog) else {
+            Issue.record("expected options"); return
+        }
+        let running = try #require(options.first { $0.activityId == "running" })
+        #expect(running.minutesLow == 40 && running.minutesHigh == 60)
+        #expect(running.suggestSplitting)
+    }
+
+    @Test func withoutPreferencesOptionsAreOrderedByShorterMinimumDuration() {
+        guard case .options(let options) = ActivityEquivalents.recommend(input(), catalog: catalog) else {
+            Issue.record("expected options"); return
+        }
+        let lows = options.filter { $0.activityId != "walking" }.map(\.minutesLow)
+        #expect(lows.count >= 2)
+        #expect(lows == lows.sorted())
     }
 
     @Test func noEligibleActivitiesWithRestrictiveConstraintsSuppresses() {

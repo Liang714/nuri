@@ -58,8 +58,8 @@ public enum ActivityEquivalents {
     }
 
     /// Recommends activities matched to target energy expenditure.
-    /// Ranking order: preferred activities (in user order), then activities fitting available time,
-    /// then shorter minimum duration, then activity ID. Walking is always included if available.
+    /// Ranking = preferred (user order) → shorter minimum duration → id; options that exceed the session cap
+    /// or the user's available time get `suggestSplitting`. Walking is always included if available.
     /// Returns `.suppressed(.noEligibleActivities)` if no activities match constraints.
     public static func recommend(_ input: EquivalentsInput, catalog: METCatalog) -> EquivalentsResult {
         guard input.enabled else { return .suppressed(.disabled) }
@@ -84,18 +84,16 @@ public enum ActivityEquivalents {
                 activityId: activity.id, intensity: intensity, met: met,
                 minutesLow: low.minutes, minutesHigh: high.minutes, highIsOpenEnded: high.openEnded,
                 suggestSplitting: high.openEnded || high.minutes > input.maxSessionMinutes
+                    || input.availableMinutes.map { low.minutes > $0 } ?? false
             )
         }
 
         func preferenceRank(_ o: EquivalentOption) -> Int {
             input.preferredActivityIds.firstIndex(of: o.activityId) ?? Int.max
         }
-        func fitsTime(_ o: EquivalentOption) -> Bool {
-            input.availableMinutes.map { o.minutesLow <= $0 } ?? true
-        }
         let ranked = options.sorted {
-            (preferenceRank($0), fitsTime($0) ? 0 : 1, $0.minutesLow, $0.activityId)
-                < (preferenceRank($1), fitsTime($1) ? 0 : 1, $1.minutesLow, $1.activityId)
+            (preferenceRank($0), $0.minutesLow, $0.activityId)
+                < (preferenceRank($1), $1.minutesLow, $1.activityId)
         }
 
         var top = Array(ranked.prefix(maxOptions))
