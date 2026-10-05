@@ -1,0 +1,10 @@
+.DS_Store
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.env
+.env.*
+node_modules/
+supabase/.temp/
+data-pipeline/raw/
