@@ -25,6 +25,9 @@ public enum ServingConversionError: Error, Equatable, Sendable {
 public enum ServingConverter {
     public static let gramsPerOunce = 28.349523125
 
+    /// Convert a quantity in a specific serving unit to grams.
+    /// When looking up food-specific units, uses the first option matching that unit.
+    /// For precise conversion with a user-chosen option, use `grams(quantity:option:)`.
     public static func grams(quantity: Double, unit: ServingUnit,
                              options: [ServingOption]) throws(ServingConversionError) -> Double {
         guard quantity.isFinite, quantity > 0 else { throw .nonPositiveQuantity }
@@ -37,5 +40,11 @@ public enum ServingConverter {
             guard let option = options.first(where: { $0.unit == unit }) else { throw .missingGramWeight(unit) }
             return quantity * option.gramsPerUnit
         }
+    }
+
+    /// Convert a quantity in a specific serving option to grams.
+    public static func grams(quantity: Double, option: ServingOption) throws(ServingConversionError) -> Double {
+        guard quantity.isFinite, quantity > 0 else { throw .nonPositiveQuantity }
+        return quantity * option.gramsPerUnit
     }
 }

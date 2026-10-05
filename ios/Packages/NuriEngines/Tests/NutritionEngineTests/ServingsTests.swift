@@ -30,4 +30,18 @@ import Testing
             try ServingConverter.grams(quantity: 0, unit: .gram, options: [])
         }
     }
+
+    @Test func convertFromChosenOption() throws {
+        let small = ServingOption(id: "small", unit: .piece, label: nil, gramsPerUnit: 40)
+        let large = ServingOption(id: "large", unit: .piece, label: nil, gramsPerUnit: 60)
+        #expect(try ServingConverter.grams(quantity: 2, option: large) == 120)
+        #expect(try ServingConverter.grams(quantity: 2, option: small) == 80)
+    }
+
+    @Test func convertFromOptionNonPositiveQuantityIsAnError() {
+        let large = ServingOption(id: "large", unit: .piece, label: nil, gramsPerUnit: 60)
+        #expect(throws: ServingConversionError.nonPositiveQuantity) {
+            try ServingConverter.grams(quantity: 0, option: large)
+        }
+    }
 }
