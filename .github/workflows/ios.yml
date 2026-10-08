@@ -1,0 +1,19 @@
+name: ios
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  design-system:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test --package-path ios/Packages/NuriDesignSystem
+  app:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pick a simulator
+        run: echo "DEVICE=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone [0-9]+( Pro)?' )" >> "$GITHUB_ENV"
+      - name: Test app
+        run: xcodebuild test -project ios/Nuri.xcodeproj -scheme Nuri -destination "platform=iOS Simulator,name=$DEVICE" -derivedDataPath build/DerivedData
