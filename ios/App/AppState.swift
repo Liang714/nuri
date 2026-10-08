@@ -1,0 +1,74 @@
+import Foundation
+import Observation
+
+enum OnboardingStage: String, Sendable {
+    case welcome, consent, complete
+}
+
+enum ConsentError: Error, Equatable, Sendable {
+    case adultRequired, healthDataRequired
+}
+
+/// What the person agreed to, when, and under which consent text version (PIPA record keeping).
+struct ConsentRecord: Codable, Equatable, Sendable {
+    let adultConfirmed: Bool
+    let healthDataConsented: Bool
+    let analyticsOptIn: Bool
+    let consentVersion: String
+    let recordedAt: Date
+}
+
+@MainActor
+@Observable
+final class AppState {
+    static let consentVersion = "2026-10-08"
+
+    private enum Keys {
+        static let stage = "onboarding.stage"
+        static let consent = "consent.record"
+        static let hideNumbers = "display.hideNumbers"
+    }
+
+    @ObservationIgnored private let defaults: UserDefaults
+    private(set) var stage: OnboardingStage
+    private(set) var consent: ConsentRecord?
+    private(set) var hideNumbers: Bool
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        let consent = defaults.data(forKey: Keys.consent).flatMap { try? JSONDecoder().decode(ConsentRecord.self, from: $0) }
+        let stored = defaults.string(forKey: Keys.stage).flatMap(OnboardingStage.init(rawValue:)) ?? .welcome
+        self.consent = consent
+        self.stage = (stored == .complete && consent == nil) ? .welcome : stored
+        self.hideNumbers = defaults.bool(forKey: Keys.hideNumbers)
+    }
+
+    func chooseGuest() { setStage(.consent) }
+
+    func recordConsent(adult: Bool, healthData: Bool, analytics: Bool, now: Date = .now) throws(ConsentError) {
+        guard adult else { throw .adultRequired }
+        guard healthData else { throw .healthDataRequired }
+        let record = ConsentRecord(adultConfirmed: true, healthDataConsented: true, analyticsOptIn: analytics,
+                                   consentVersion: Self.consentVersion, recordedAt: now)
+        if let data = try? JSONEncoder().encode(record) { defaults.set(data, forKey: Keys.consent) }
+        consent = record
+        setStage(.complete)
+    }
+
+    func setHideNumbers(_ hidden: Bool) {
+        hideNumbers = hidden
+        defaults.set(hidden, forKey: Keys.hideNumbers)
+    }
+
+    func startOver() {
+        for key in [Keys.stage, Keys.consent, Keys.hideNumbers] { defaults.removeObject(forKey: key) }
+        consent = nil
+        hideNumbers = false
+        stage = .welcome
+    }
+
+    private func setStage(_ newStage: OnboardingStage) {
+        stage = newStage
+        defaults.set(newStage.rawValue, forKey: Keys.stage)
+    }
+}
