@@ -18,8 +18,11 @@ public struct NoticeCard: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "heart").font(.nuriHeadline).foregroundStyle(Color.nuriNoticeInk).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 6) {
-                title.font(.nuriSubheadlineEmphasis)
-                message.font(.nuriFootnote)
+                VStack(alignment: .leading, spacing: 6) {
+                    title.font(.nuriSubheadlineEmphasis)
+                    message.font(.nuriFootnote)
+                }
+                .accessibilityElement(children: .combine)
                 if let actionTitle, let action {
                     Button(action: action) { actionTitle }
                         .buttonStyle(.plain)
@@ -33,6 +36,6 @@ public struct NoticeCard: View {
         }
         .padding(16)
         .background(Color.nuriNotice, in: RoundedRectangle(cornerRadius: NuriMetrics.radiusCard, style: .continuous))
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
     }
 }

@@ -3,6 +3,7 @@
   "strings" : {
     "Why this ad, and hide options" : {
       "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Why this ad, and hide options" } },
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 광고가 표시되는 이유와 숨기기 옵션" } }
       }
     }

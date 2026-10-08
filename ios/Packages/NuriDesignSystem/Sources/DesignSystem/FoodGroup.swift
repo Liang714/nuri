@@ -28,4 +28,6 @@ public enum FoodGroup: String, CaseIterable, Codable, Sendable {
 
 public enum WorldPalette {
     public static let globe = ThemedColor(light: 0xDCE9F1, dark: 0x22313A)
+    /// Separator stroke drawn behind a filled place. White on light; in dark it blends with the globe instead of glaring.
+    public static let halo = ThemedColor(light: 0xFFFFFF, dark: 0x22313A)
 }

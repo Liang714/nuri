@@ -43,7 +43,7 @@ public struct NuriTextButtonStyle: ButtonStyle {
         configuration.label
             .font(.nuriSubheadlineEmphasis)
             .foregroundStyle(Color.nuriTint.opacity(configuration.isPressed ? 0.6 : 1))
-            .frame(minHeight: NuriMetrics.minTouch)
+            .frame(minWidth: NuriMetrics.minTouch, minHeight: NuriMetrics.minTouch)
             .contentShape(Rectangle())
     }
 }

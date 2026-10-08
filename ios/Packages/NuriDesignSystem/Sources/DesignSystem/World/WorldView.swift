@@ -48,7 +48,7 @@ public struct WorldView: View {
             if filled {
                 shape.fill(Color(group.fill))
                     .overlay(shape.strokeBorder(Color(ring), lineWidth: 2))
-                    .background(shape.stroke(Color.white, lineWidth: 3))
+                    .background(shape.stroke(Color(WorldPalette.halo), lineWidth: 3))
             } else {
                 shape.fill(Color(group.fill).opacity(0.18))
                     .overlay(shape.strokeBorder(Color(ring), style: StrokeStyle(lineWidth: 2, dash: [4, 3])))

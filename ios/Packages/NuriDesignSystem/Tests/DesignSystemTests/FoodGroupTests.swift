@@ -21,4 +21,9 @@ import Testing
         #expect(FoodGroup.protein.fill == RGB(hex: 0x7E4127))
         #expect(FoodGroup.grains.fill == RGB(hex: 0xE2B54E))
     }
+
+    @Test func haloIsThemedAndBlendsWithGlobeInDark() {
+        #expect(WorldPalette.halo.dark == WorldPalette.globe.dark)
+        #expect(WorldPalette.halo.light == RGB(hex: 0xFFFFFF))
+    }
 }
