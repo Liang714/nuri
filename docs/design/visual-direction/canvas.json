@@ -1,0 +1,129 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 844,
+      "title": "My Nuri, today",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "HomeSensitive.dc.html": {
+      "h": 844,
+      "title": "My Nuri, numbers hidden",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "HomeScrolled.dc.html": {
+      "h": 844,
+      "title": "My Nuri, scrolled",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "HomeLargeText.dc.html": {
+      "h": 844,
+      "title": "My Nuri, largest text",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "FoodSearch.dc.html": {
+      "h": 844,
+      "title": "Add food sheet",
+      "w": 390,
+      "x": 1880,
+      "y": 0,
+      "is_interactive": true
+    },
+    "FoodDetail.dc.html": {
+      "h": 844,
+      "title": "Food detail and portion",
+      "w": 390,
+      "x": 2350,
+      "y": 0,
+      "is_interactive": true
+    },
+    "TodayPlan.dc.html": {
+      "h": 844,
+      "title": "Plan",
+      "w": 390,
+      "x": 2820,
+      "y": 0,
+      "is_interactive": true
+    },
+    "Tokens.dc.html": {
+      "h": 2300,
+      "title": "Design system",
+      "w": 1440,
+      "x": 0,
+      "y": 2488
+    },
+    "Welcome.dc.html": {
+      "h": 844,
+      "title": "Welcome and sign in",
+      "w": 390,
+      "x": 0,
+      "y": 1244
+    },
+    "EmailSignIn.dc.html": {
+      "h": 844,
+      "title": "Email sign in",
+      "w": 390,
+      "x": 470,
+      "y": 1244,
+      "is_interactive": true
+    },
+    "Consent.dc.html": {
+      "h": 844,
+      "title": "Before you start",
+      "w": 390,
+      "x": 940,
+      "y": 1244,
+      "is_interactive": true
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-08T09:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "title": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Nuri 누리 — app screens",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "auth": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Sign in and first run",
+      "w": 240,
+      "x": 0,
+      "y": 964
+    }
+  },
+  "order": [
+    "Welcome.dc.html",
+    "EmailSignIn.dc.html",
+    "Consent.dc.html",
+    "Main.dc.html",
+    "HomeSensitive.dc.html",
+    "HomeScrolled.dc.html",
+    "HomeLargeText.dc.html",
+    "FoodSearch.dc.html",
+    "FoodDetail.dc.html",
+    "TodayPlan.dc.html",
+    "Tokens.dc.html"
+  ],
+  "pages": [],
+  "title": "Nuri — Visual Direction"
+}

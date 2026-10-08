@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rice, white, cooked — add to lunch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&amp;family=Noto+Sans+KR:wght@400;700&amp;family=Gowun+Dodum&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2F6690}a:hover{color:#24557A}
+::selection{background:#CFE0EC}
+button:focus-visible,a:focus-visible{outline:3px solid #4A82AB;outline-offset:2px}
+input::placeholder{color:#5C6660}
+
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #3A4540; font-family: Nunito, 'Noto Sans KR', system-ui, sans-serif; color: #17211B; position: relative; overflow: hidden; font-variant-numeric: tabular-nums"><div aria-hidden="true" style="position: absolute; left: 10px; right: 10px; top: 50px; height: 40px; border-radius: 14px 14px 0 0; background: #8E9791"></div><section role="dialog" aria-modal="true" aria-label="Rice, white, cooked" style="position: absolute; left: 0; right: 0; top: 62px; bottom: 0; background: #F2F4EF; border-radius: 14px 14px 0 0; display: flex; flex-direction: column"><div aria-hidden="true" style="width: 36px; height: 5px; border-radius: 3px; background: #B9C1BB; margin: 6px auto 0 auto"></div><div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 0 8px"><a href="FoodSearch.dc.html" style="min-height: 44px; display: flex; align-items: center; gap: 2px; padding-right: 8px; text-decoration: none; font-size: 17px; color: #3B6A4A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Search</a><a href="Main.dc.html" style="min-height: 44px; display: flex; align-items: center; padding: 0 8px; text-decoration: none; font-size: 17px; color: #3B6A4A">Cancel</a></div><div style="padding: 2px 20px 0 20px; display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700">Rice, white, cooked</h2><span style="font-size: 15px; color: #2D5E3D; font-weight: 600; display: flex; align-items: center; gap: 6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2D5E3D" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>Verified, USDA FoodData Central</span></div><div style="padding: 18px 16px 0 16px; display: flex; flex-direction: column; gap: 14px"><div role="radiogroup" aria-label="Portion unit" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #E3E8E2; border-radius: 11px; padding: 2px"><button role="radio" aria-checked="{{bowlChecked}}" onClick="{{ useBowl }}" style="min-height: 40px; border: none; border-radius: 9px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; color: #17211B; background: {{bowlBg}}; box-shadow: {{bowlShadow}}">Bowl</button><button role="radio" aria-checked="{{gramChecked}}" onClick="{{ useGram }}" style="min-height: 40px; border: none; border-radius: 9px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; color: #17211B; background: {{gramBg}}; box-shadow: {{gramShadow}}">Grams</button></div><div role="group" aria-label="{{portionSpoken}}" style="background: #FFFFFF; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 12px"><button aria-label="Decrease portion" aria-disabled="{{ atMin }}" onClick="{{ less }}" style="width: 48px; height: 48px; border-radius: 24px; border: none; background: #E3E8E2; color: #17211B; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{lessOpacity}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button><div aria-live="polite" style="flex-grow: 1; display: flex; flex-direction: column; align-items: center"><span style="font-size: 22px; line-height: 28px; font-weight: 700">{{portionTitle}}</span><span style="font-size: 13px; color: #4A5750">{{portionSub}}</span></div><button aria-label="Increase portion" onClick="{{ more }}" style="width: 48px; height: 48px; border-radius: 24px; border: none; background: #E3E8E2; color: #17211B; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></div><sc-if value="{{ showNumbers }}" hint-placeholder-val="{{ true }}"><dl style="margin: 0; background: #FFFFFF; border-radius: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px 16px"><div style="padding: 10px 0; display: flex; flex-direction: column"><dt style="font-size: 13px; color: #4A5750">Energy</dt><dd style="margin: 0; font-size: 17px; font-weight: 700">{{kcal}} kcal</dd></div><div style="padding: 10px 0; display: flex; flex-direction: column"><dt style="font-size: 13px; color: #4A5750">Carbs</dt><dd style="margin: 0; font-size: 17px; font-weight: 700">{{carbs}} g</dd></div><div style="padding: 10px 0; display: flex; flex-direction: column"><dt style="font-size: 13px; color: #4A5750">Protein</dt><dd style="margin: 0; font-size: 17px; font-weight: 700">{{protein}} g</dd></div><div style="padding: 10px 0; display: flex; flex-direction: column"><dt style="font-size: 13px; color: #4A5750">Fat</dt><dd style="margin: 0; font-size: 17px; font-weight: 700">{{fat}} g</dd></div></dl></sc-if><sc-if value="{{ hideNumbers }}" hint-placeholder-val="{{ false }}"><div style="background: #FFFFFF; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-size: 15px"><span style="width: 12px; height: 12px; border-radius: 6px; background: #E2B54E; box-shadow: inset 0 0 0 1.5px #8A6A1E"></span>Grains, adds to your world</div></sc-if><div style="background: #FFFFFF; border-radius: 16px; display: flex; flex-direction: column"><button style="min-height: 48px; padding: 0 16px; border: none; background: transparent; font-family: inherit; font-size: 15px; color: #17211B; display: flex; align-items: center; justify-content: space-between; cursor: pointer">Meal<span style="color: #4A5750; display: flex; align-items: center; gap: 6px">Lunch<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7F8882" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></span></button><div style="height: 1px; background: #E7EBE5; margin-left: 16px"></div><button style="min-height: 48px; padding: 0 16px; border: none; background: transparent; font-family: inherit; font-size: 15px; color: #17211B; display: flex; align-items: center; justify-content: space-between; cursor: pointer">Time<span style="color: #4A5750; display: flex; align-items: center; gap: 6px">Today, 12:30<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7F8882" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></span></button></div></div><div style="position: absolute; left: 16px; right: 16px; bottom: 34px; display: flex; flex-direction: column; gap: 10px"><sc-if value="{{ notAdded }}" hint-placeholder-val="{{ true }}"><button onClick="{{ add }}" style="width: 100%; min-height: 52px; border: none; border-radius: 14px; background: #3B6A4A; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Add to lunch</button></sc-if><sc-if value="{{ added }}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 10px"><div role="status" style="background: #17211B; color: #FFFFFF; border-radius: 14px; padding: 4px 6px 4px 14px; display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 11px; background: #2E5539; display: flex; align-items: center; justify-content: center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="flex-grow: 1; font-size: 15px; font-weight: 600">Added to lunch</span><button onClick="{{ undo }}" style="min-height: 44px; padding: 0 12px; border: none; background: transparent; color: #A9D3B4; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Undo</button></div><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px"><a href="FoodSearch.dc.html" style="min-height: 52px; border-radius: 14px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #17211B; font-size: 17px; font-weight: 700">Add another food</a><a href="Main.dc.html" style="min-height: 52px; border-radius: 14px; background: #3B6A4A; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #FFFFFF; font-size: 17px; font-weight: 700">Done</a></div></div></sc-if></div></section></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"numbersHidden":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { unit: 'bowl', bowls: 1, grams: 210, added: false }; }
+  renderVals() {
+    const s = this.state;
+    const hidden = this.props.numbersHidden ?? false;
+    const g = s.unit === 'bowl' ? Math.round(210 * s.bowls) : s.grams;
+    const per = g / 100;
+    const bowlText = (s.bowls % 1 === 0 ? String(s.bowls) : s.bowls.toFixed(1)) + (s.bowls === 1 ? ' bowl' : ' bowls');
+    const title = s.unit === 'bowl' ? bowlText : g + ' g';
+    const atMin = s.unit === 'bowl' ? s.bowls <= 0.5 : s.grams <= 10;
+    const on = { bg: '#FFFFFF', shadow: '0 1px 3px rgba(23,33,27,0.18), inset 0 0 0 1px #B9C1BB' };
+    const off = { bg: 'transparent', shadow: 'none' };
+    const b = s.unit === 'bowl' ? on : off, gr = s.unit === 'gram' ? on : off;
+    return {
+      showNumbers: !hidden,
+      hideNumbers: hidden,
+      portionTitle: title,
+      portionSub: hidden ? 'Adjust to what you had' : (s.unit === 'bowl' ? g + ' g' : 'about ' + (g / 210).toFixed(1) + ' bowl'),
+      portionSpoken: 'Portion, ' + title + (hidden ? '' : ', ' + g + ' grams'),
+      kcal: Math.round(130 * per), carbs: (28.2 * per).toFixed(1), protein: (2.7 * per).toFixed(1), fat: (0.3 * per).toFixed(1),
+      bowlChecked: s.unit === 'bowl' ? 'true' : 'false', gramChecked: s.unit === 'gram' ? 'true' : 'false',
+      bowlBg: b.bg, bowlShadow: b.shadow, gramBg: gr.bg, gramShadow: gr.shadow,
+      atMin: atMin, lessOpacity: atMin ? '0.4' : '1',
+      useBowl: () => this.setState({ unit: 'bowl' }),
+      useGram: () => this.setState({ unit: 'gram', grams: g }),
+      less: () => atMin ? null : (s.unit === 'bowl' ? this.setState({ bowls: s.bowls - 0.5 }) : this.setState({ grams: s.grams - 10 })),
+      more: () => s.unit === 'bowl' ? this.setState({ bowls: Math.min(5, s.bowls + 0.5) }) : this.setState({ grams: Math.min(1000, s.grams + 10) }),
+      added: s.added, notAdded: !s.added,
+      add: () => this.setState({ added: true }),
+      undo: () => this.setState({ added: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

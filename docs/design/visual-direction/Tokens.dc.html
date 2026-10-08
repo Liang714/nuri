@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nuri design system</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&amp;family=Noto+Sans+KR:wght@400;700&amp;family=Gowun+Dodum&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2F6690}a:hover{color:#24557A}
+::selection{background:#CFE0EC}
+</style>
+</helmet>
+<div style="width: 1440px; height: 2300px; box-sizing: border-box; background: #F2F4EF; font-family: Nunito, 'Noto Sans KR', system-ui, sans-serif; color: #17211B; padding: 64px; display: flex; flex-direction: column; gap: 48px; font-variant-numeric: tabular-nums">
+
+  <header style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 760px">
+      <h1 style="margin: 0; font-size: 44px; line-height: 50px; font-weight: 700; letter-spacing: -0.6px">Nuri design system</h1>
+      <p style="margin: 0; font-size: 17px; line-height: 25px; color: #4A5750">Native iOS first. System navigation and controls; Nuri lives in the tint, the rounded type, the food-group colors and the world. Progress is always calm blue, never a pass or fail.</p>
+    </div>
+    <span aria-label="Nuri logotype" style="font-family: 'Gowun Dodum', sans-serif; font-size: 56px; line-height: 56px; color: #3B6A4A">누리</span>
+  </header>
+
+  <section aria-labelledby="color-h" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <h2 id="color-h" style="margin: 0; font-size: 22px; font-weight: 700">Color, light</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #F2F4EF; box-shadow: inset 0 0 0 1px #DDE2DA"></div><span style="font-size: 15px; font-weight: 700">Mist</span><span style="font-size: 13px; color: #4A5750">#F2F4EF ground</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #DDE2DA"></div><span style="font-size: 15px; font-weight: 700">Surface</span><span style="font-size: 13px; color: #4A5750">#FFFFFF lists</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #17211B"></div><span style="font-size: 15px; font-weight: 700">Ink</span><span style="font-size: 13px; color: #4A5750">#17211B, 15:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #4A5750"></div><span style="font-size: 15px; font-weight: 700">Ink soft</span><span style="font-size: 13px; color: #4A5750">#4A5750, 6.9:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #3B6A4A"></div><span style="font-size: 15px; font-weight: 700">Moss tint</span><span style="font-size: 13px; color: #4A5750">#3B6A4A, white 6.3:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #4A82AB"></div><span style="font-size: 15px; font-weight: 700">Progress sky</span><span style="font-size: 13px; color: #4A5750">#4A82AB, track 3.3:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #2F6690"></div><span style="font-size: 15px; font-weight: 700">Link sky</span><span style="font-size: 13px; color: #4A5750">#2F6690, 6.1:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #EADFC8"></div><span style="font-size: 15px; font-weight: 700">Sand</span><span style="font-size: 13px; color: #4A5750">#EADFC8 placeholders</span></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 22px; font-weight: 700">Color, dark</h2>
+      <div style="background: #121714; border-radius: 16px; padding: 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; color: #EEF2EC">
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #121714; box-shadow: inset 0 0 0 1px #2E3832"></div><span style="font-size: 15px; font-weight: 700">Ground</span><span style="font-size: 13px; color: #A9B5AC">#121714</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #1C231E"></div><span style="font-size: 15px; font-weight: 700">Surface</span><span style="font-size: 13px; color: #A9B5AC">#1C231E</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #EEF2EC"></div><span style="font-size: 15px; font-weight: 700">Ink</span><span style="font-size: 13px; color: #A9B5AC">#EEF2EC</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #A9B5AC"></div><span style="font-size: 15px; font-weight: 700">Ink soft</span><span style="font-size: 13px; color: #A9B5AC">#A9B5AC, 8.5:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #7FB58A"></div><span style="font-size: 15px; font-weight: 700">Moss tint</span><span style="font-size: 13px; color: #A9B5AC">#7FB58A, 7.7:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #7EB0D6"></div><span style="font-size: 15px; font-weight: 700">Progress sky</span><span style="font-size: 13px; color: #A9B5AC">#7EB0D6, 7.8:1</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #9CC3E2"></div><span style="font-size: 15px; font-weight: 700">Link sky</span><span style="font-size: 13px; color: #A9B5AC">#9CC3E2</span></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><div style="height: 64px; border-radius: 12px; background: #3A3326"></div><span style="font-size: 15px; font-weight: 700">Sand</span><span style="font-size: 13px; color: #A9B5AC">#3A3326</span></div>
+      </div>
+      <div style="background: #121714; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; color: #EEF2EC">
+        <span style="font-size: 13px; color: #A9B5AC">Dark semantic pairs</span>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+          <span style="min-height: 44px; padding: 0 16px; border-radius: 12px; background: #7FB58A; color: #121714; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center">On tint #121714, 7.7:1</span>
+          <span style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #2B342E; color: #FFFFFF; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center">Toast #2B342E</span>
+          <span style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #1C231E; box-shadow: inset 0 0 0 1.5px #7D857F; color: #C9D1CB; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center">Ad · [Partner], outline #7D857F</span>
+        </div>
+        <div style="display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; font-weight: 600"><span style="color: #7FB58A">Verified #7FB58A</span><span style="color: #9CC3E2">Manufacturer #9CC3E2</span><span style="color: #D9A55B">Community #D9A55B</span><span style="color: #E8D9B5">Notice text on #2E2919</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="world-h" style="display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: center; background: #FFFFFF; border-radius: 20px; padding: 32px">
+    <div role="img" aria-label="World example: vegetables, grains, protein and fruit today, legumes resting from earlier in the week" style="width: 220px; height: 220px; border-radius: 110px; background: #DCE9F1; position: relative; overflow: hidden; justify-self: center; box-shadow: 0 10px 24px rgba(36,64,52,0.12), inset -16px -12px 0 rgba(23,33,27,0.05)">
+      <div style="position: absolute; left: 20px; top: 50px; width: 96px; height: 72px; border-radius: 48px 42px 56px 34px; background: #4F8A5B; border: 2px solid #2F5A39; box-shadow: 0 0 0 1.5px #FFFFFF; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 112px; top: 28px; width: 78px; height: 58px; border-radius: 34px 44px 28px 48px; background: #E2B54E; border: 2px solid #8A6A1E; box-shadow: 0 0 0 1.5px #FFFFFF; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 74px; top: 126px; width: 108px; height: 64px; border-radius: 44px 56px 38px 52px; background: #7E4127; border: 2px solid #4A2414; box-shadow: 0 0 0 1.5px #FFFFFF; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 164px; top: 98px; width: 44px; height: 44px; border-radius: 22px; background: #D07A9A; border: 2px solid #8E4766; box-shadow: 0 0 0 1.5px #FFFFFF; box-sizing: border-box"></div>
+      <div style="position: absolute; left: 30px; top: 148px; width: 34px; height: 30px; border-radius: 16px; background: rgba(139,122,192,0.18); border: 2px dashed #5E4F94; box-sizing: border-box"></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <h2 id="world-h" style="margin: 0; font-size: 22px; font-weight: 700">The world, Nuri's signature</h2>
+      <p style="margin: 0; font-size: 17px; line-height: 25px; color: #17211B; max-width: 720px">Each food group you eat today becomes a place on your world. Groups from earlier in the week rest as outlines; nothing ever shrinks or disappears, and there is no count to beat. Logging a food makes its place glow once (a crossfade when Reduce Motion is on). VoiceOver reads the world as a sentence, never as a score.</p>
+      <ul style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; font-size: 15px">
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #4F8A5B"></span>Vegetables, #4F8A5B</li>
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #D07A9A"></span>Fruit, #D07A9A</li>
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #E2B54E"></span>Grains, #E2B54E</li>
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #7E4127"></span>Protein, #7E4127</li>
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #8B7AC0"></span>Legumes and nuts, #8B7AC0</li>
+        <li style="display: flex; align-items: center; gap: 10px"><span style="width: 16px; height: 16px; border-radius: 8px; background: #F6F3EA; box-shadow: inset 0 0 0 1.5px #B5AE9C"></span>Dairy and alternatives</li>
+      </ul>
+      <p style="margin: 0; font-size: 13px; color: #4A5750">Food-group colors appear only in the world and its legend. Sources, ads and notices never reuse them. Each place has a darker ring and a white gap so neighbors stay distinct with color blindness; with Differentiate Without Color on, places also get textures.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="type-h" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="type-h" style="margin: 0; font-size: 22px; font-weight: 700">Type, iOS text styles</h2>
+      <p style="margin: 0; font-size: 13px; color: #4A5750">SF Pro Rounded with Apple SD Gothic Neo for Korean. Every size scales with Dynamic Type; rows stack vertically at accessibility sizes. Shown here in Nunito.</p>
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 8px 20px; display: flex; flex-direction: column">
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Large Title 34, bold</span><span style="font-size: 34px; font-weight: 700; letter-spacing: -0.4px">My Nuri</span></div>
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Title 1 28, bold</span><span style="font-size: 28px; font-weight: 700">Rice, white, cooked</span></div><div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Title 2 22, bold</span><span style="font-size: 22px; font-weight: 700">Meals</span></div>
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Headline 17, bold</span><span style="font-size: 17px; font-weight: 700">Brisk walk</span></div>
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Body 17, regular</span><span style="font-size: 17px">Rice, white, cooked · 김치볶음밥</span></div>
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Subheadline 15</span><span style="font-size: 15px; color: #4A5750">Daily guide about 2,000 kcal</span></div>
+        <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Footnote 13</span><span style="font-size: 13px; color: #4A5750">From Apple Health, not added to your guide</span></div><div style="display: grid; grid-template-columns: 170px minmax(0, 1fr); align-items: baseline; padding: 8px 0"><span style="font-size: 13px; color: #4A5750">Caption 12 / 11</span><span style="font-size: 12px; color: #4A5750">Mon Tue Wed, tab labels</span></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 22px; font-weight: 700">Controls</h2>
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+          <button style="min-height: 52px; padding: 0 22px; border: none; border-radius: 14px; background: #3B6A4A; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">Add to lunch</button>
+          <button style="min-height: 52px; padding: 0 22px; border: none; border-radius: 14px; background: #2E5539; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">Pressed</button>
+          <button disabled style="min-height: 52px; padding: 0 22px; border: none; border-radius: 14px; background: #D3D9D2; color: #4A5750; font-family: inherit; font-size: 17px; font-weight: 700">Disabled</button>
+          <button style="min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #E3E8E2; color: #17211B; font-family: inherit; font-size: 15px; font-weight: 700">Log it</button>
+          <button style="min-height: 44px; padding: 0 12px; border: none; background: transparent; color: #3B6A4A; font-family: inherit; font-size: 15px; font-weight: 600">Swap</button>
+        </div>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; font-weight: 600">
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #2D5E3D"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg>Verified source</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #2F6690"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 20V9l5-3v4l5-3v4l6-3v12z"></path></svg>Manufacturer data</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #7A4E0C"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="3"></circle><circle cx="16.5" cy="10" r="2.5"></circle><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5M14 15c2.5-.6 5 .5 6 3.5"></path></svg>Community, check values</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #4A5750"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20c1-3.8 4-5.5 7-5.5s6 1.7 7 5.5"></path></svg>Your food</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #4A5750"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>Photo estimate</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 15px; font-weight: 700">2,120 kcal so far. A guide, not a limit.</span>
+          <div style="height: 8px; border-radius: 4px; background: #4A82AB"></div>
+          <span style="font-size: 13px; color: #4A5750">Over target uses the same calm color and a reassuring sentence. Never red, never a warning.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="states-h" style="display: flex; flex-direction: column; gap: 14px">
+    <h2 id="states-h" style="margin: 0; font-size: 22px; font-weight: 700">Sponsorship, notices and states</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+      <div style="background: #FFFFFF; border-radius: 16px; box-shadow: inset 0 0 0 1.5px #858B83; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 13px; font-weight: 700; color: #3A403C">Ad · [Partner] &nbsp;/&nbsp; 광고 · [Partner]</span>
+        <span style="font-size: 17px; font-weight: 700">[Product]</span>
+        <span style="font-size: 13px; color: #4A5750; line-height: 18px">Label first in the user’s language (Ad, 광고), solid neutral outline, data source always shown, a 44pt Why this ad button, never preselected. Chosen by screen, season or search words only, never by food log, Health data or settings. Never next to totals or right after a matching logged meal. Hidden when numbers are hidden. Banned: diet, weight-loss, detox, cleanse and supplement products, and copy like guilt-free, skinny, burn or before and after. Affiliate links say Nuri may earn a commission.</span>
+      </div>
+      <div style="background: #F5EEDC; border-radius: 16px; padding: 16px; display: flex; gap: 12px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B4E12" stroke-width="1.9" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 15px; font-weight: 700">A lighter plan for now</span>
+          <span style="font-size: 13px; line-height: 18px">You mentioned a heart condition. Please check with a clinician before adding more. Here is an easy walk meanwhile.</span>
+          <a href="#" style="font-size: 13px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center">Update my answers</a>
+        </div>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5C6862" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4-4M8.5 11h5"></path></svg>
+        <span style="font-size: 15px; font-weight: 700">No match for “kimchi jjigae”</span>
+        <span style="font-size: 13px; color: #4A5750; line-height: 18px">Try another spelling, scan the package label, or create it once and Nuri will remember it.</span>
+        <button style="min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #E3E8E2; font-family: inherit; font-size: 15px; font-weight: 700; color: #17211B">Create food</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div role="status" style="background: #17211B; color: #FFFFFF; border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9D3B4" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 9a13 13 0 0 1 18 0M6.5 12.5a8 8 0 0 1 11 0M10 16a3 3 0 0 1 4 0M4 4l16 16"></path></svg>Offline. Logs are saved and will sync.</div>
+        <div style="background: #FFFFFF; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 15px; font-weight: 700">Apple Health is off</span>
+          <span style="font-size: 13px; color: #4A5750; line-height: 18px">Nuri reads workouts only if you allow it. You can log activity by hand anytime.</span>
+          <a href="#" style="font-size: 13px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center">Open Health settings</a>
+        </div>
+        <div aria-hidden="true" style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="height: 14px; width: 60%; border-radius: 7px; background: #E7EBE5"></div>
+          <div style="height: 12px; width: 40%; border-radius: 6px; background: #EEF1EC"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rules-h" style="display: flex; flex-direction: column; gap: 14px">
+    <h2 id="rules-h" style="margin: 0; font-size: 22px; font-weight: 700">Rules engineers build to</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <h3 style="margin: 0; font-size: 17px; font-weight: 700">When numbers are hidden</h3>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 21px">
+          <li>Hides energy, nutrients, grams, activity minutes, weekly totals and exercise energy on every screen, including Diary and search.</li>
+          <li>Portions use household measures; food detail shows its food group instead of a nutrition grid.</li>
+          <li>The plan shows days, not minutes. No ads appear.</li>
+          <li>The setting lives in You, Display, and is named Hide numbers, never by condition.</li>
+        </ul>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <h3 style="margin: 0; font-size: 17px; font-weight: 700">Large text</h3>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 21px">
+          <li>From accessibility sizes, label and value rows stack vertically and the logotype hides.</li>
+          <li>The world shrinks beside its sentence; buttons become full-width rows.</li>
+          <li>Tab labels hide and icons grow; the week strip scrolls sideways.</li>
+          <li>Korean product names wrap to two lines before truncating. Numbers and units never split.</li>
+        </ul>
+      </div>
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <h3 style="margin: 0; font-size: 17px; font-weight: 700">Why this ad sheet</h3>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 21px">
+          <li>Not based on your food log, Health data or settings.</li>
+          <li>Shown because of this screen or your search words.</li>
+          <li>Hide this ad, Fewer like this, and Remove ads with Premium.</li>
+          <li>For affiliate links: Nuri may earn a commission. 제휴 링크로 수수료를 받을 수 있어요.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

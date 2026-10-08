@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in with email</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&amp;family=Noto+Sans+KR:wght@400;700&amp;family=Gowun+Dodum&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2F6690}a:hover{color:#24557A}
+::selection{background:#CFE0EC}
+button:focus-visible,a:focus-visible{outline:3px solid #4A82AB;outline-offset:2px}
+input::placeholder{color:#5C6660}
+
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2F4EF; font-family: Nunito, 'Noto Sans KR', system-ui, sans-serif; color: #17211B; position: relative; overflow: hidden; font-variant-numeric: tabular-nums"><main style="display: flex; flex-direction: column; padding: 59px 16px 0 16px"><a href="Welcome.dc.html" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 2px; text-decoration: none; font-size: 17px; color: #3B6A4A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Back</a><div style="padding: 8px 4px 0 4px; display: flex; flex-direction: column; gap: 22px"><sc-if value="{{ onEmail }}" hint-placeholder-val="{{ true }}"><div style="display: flex; flex-direction: column; gap: 22px"><div style="display: flex; flex-direction: column; gap: 6px"><h1 style="margin: 0; font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: -0.4px">Sign in with email</h1><p style="margin: 0; font-size: 17px; line-height: 23px; color: #4A5750">We will send a 6-digit code. No password to remember.</p></div><label style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600">Email</span><input type="email" autocomplete="email" placeholder="you@example.com" style="height: 52px; box-sizing: border-box; border: none; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; padding: 0 14px; font-family: inherit; font-size: 17px; color: #17211B"></label><button onClick="{{ sendCode }}" style="min-height: 52px; border: none; border-radius: 14px; background: #3B6A4A; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Send code</button></div></sc-if><sc-if value="{{ onCode }}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 22px"><div style="display: flex; flex-direction: column; gap: 6px"><h1 style="margin: 0; font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: -0.4px">Check your email</h1><p style="margin: 0; font-size: 17px; line-height: 23px; color: #4A5750">Enter the 6-digit code we sent to you@example.com. It works for 10 minutes.</p></div><div role="group" aria-label="6-digit code" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px"><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 2px #4A82AB; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span><span style="height: 56px; border-radius: 12px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #C9D0C8; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700"></span></div><a href="Consent.dc.html" style="min-height: 52px; border-radius: 14px; background: #3B6A4A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700">Verify</a><div style="display: flex; justify-content: space-between"><span style="min-height: 44px; display: flex; align-items: center; font-size: 15px; color: #4A5750">Resend code in 0:30</span><button onClick="{{ changeEmail }}" style="min-height: 44px; border: none; background: transparent; font-family: inherit; font-size: 15px; font-weight: 700; color: #3B6A4A; cursor: pointer">Use a different email</button></div></div></sc-if></div></main></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { step: 'email' }; }
+  renderVals() {
+    const code = this.state.step === 'code';
+    return {
+      onEmail: !code, onCode: code,
+      sendCode: () => this.setState({ step: 'code' }),
+      changeEmail: () => this.setState({ step: 'email' })
+    };
+  }
+}
+</script>
+</body>
+</html>
