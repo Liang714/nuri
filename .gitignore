@@ -10,3 +10,4 @@ supabase/.temp/
 data-pipeline/raw/
 .superpowers/
 build/
+__pycache__/

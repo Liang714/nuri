@@ -36,21 +36,25 @@ final class AppState {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let consent = defaults.data(forKey: Keys.consent).flatMap { try? JSONDecoder().decode(ConsentRecord.self, from: $0) }
+        let consent = defaults.data(forKey: Keys.consent).flatMap { try? Self.decoder.decode(ConsentRecord.self, from: $0) }
         let stored = defaults.string(forKey: Keys.stage).flatMap(OnboardingStage.init(rawValue:)) ?? .welcome
         self.consent = consent
-        self.stage = (stored == .complete && consent == nil) ? .welcome : stored
+        self.stage = Self.resolvedStage(stored: stored, consent: consent)
         self.hideNumbers = defaults.bool(forKey: Keys.hideNumbers)
     }
 
-    func chooseGuest() { setStage(.consent) }
+    /// Only the welcome screen leads to consent; later stages are not rewound by a stray call.
+    func chooseGuest() {
+        guard stage == .welcome else { return }
+        setStage(.consent)
+    }
 
     func recordConsent(adult: Bool, healthData: Bool, analytics: Bool, now: Date = .now) throws(ConsentError) {
         guard adult else { throw .adultRequired }
         guard healthData else { throw .healthDataRequired }
         let record = ConsentRecord(adultConfirmed: true, healthDataConsented: true, analyticsOptIn: analytics,
                                    consentVersion: Self.consentVersion, recordedAt: now)
-        if let data = try? JSONEncoder().encode(record) { defaults.set(data, forKey: Keys.consent) }
+        if let data = try? Self.encoder.encode(record) { defaults.set(data, forKey: Keys.consent) }
         consent = record
         setStage(.complete)
     }
@@ -65,6 +69,26 @@ final class AppState {
         consent = nil
         hideNumbers = false
         stage = .welcome
+    }
+
+    private static var encoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+
+    private static var decoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
+
+    /// A stored `.complete` is trusted only with a consent record for the current consent text.
+    /// A record for an older text sends the person back to consent; no record at all, back to welcome.
+    private static func resolvedStage(stored: OnboardingStage, consent: ConsentRecord?) -> OnboardingStage {
+        guard stored == .complete else { return stored }
+        guard let consent else { return .welcome }
+        return consent.consentVersion == consentVersion ? .complete : .consent
     }
 
     private func setStage(_ newStage: OnboardingStage) {

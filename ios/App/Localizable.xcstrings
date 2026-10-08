@@ -28,7 +28,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "계정 로그인은 다음 버전에서 제공돼요"
+            "value" : "계정 로그인은 이후 버전에서 제공돼요"
           }
         }
       }
@@ -65,6 +65,22 @@
         }
       }
     },
+    "Add meals, watch your world grow, and get a plan that fits your week. Your data stays yours." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add meals, watch your world grow, and get a plan that fits your week. Your data stays yours."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "식사를 추가하고, 나만의 세계가 자라는 것을 보고, 내 한 주에 맞는 플랜을 받아 보세요. 내 데이터는 나의 것이에요."
+          }
+        }
+      }
+    },
     "Age, height and weight, only to estimate your daily guide." : {
       "localizations" : {
         "en" : {
@@ -92,7 +108,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "음식 그룹으로 그려진 작은 세계"
+            "value" : "식품군으로 그려진 세계"
           }
         }
       }
@@ -268,7 +284,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이메일 로그인은 다음 버전에서 제공돼요. 지금은 계정 없이 누리를 사용할 수 있어요."
+            "value" : "이메일 로그인은 이후 버전에서 제공돼요. 지금은 계정 없이 누리를 사용할 수 있어요."
           }
         }
       }
@@ -321,18 +337,18 @@
         }
       }
     },
-    "For adults 18 and over. By continuing you agree to the Terms and Privacy Policy." : {
+    "For adults 18 and over." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "For adults 18 and over. By continuing you agree to the Terms and Privacy Policy."
+            "value" : "For adults 18 and over."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "만 18세 이상 성인을 위한 앱이에요. 계속하면 이용약관과 개인정보 처리방침에 동의하게 돼요."
+            "value" : "만 18세 이상을 위한 앱이에요."
           }
         }
       }
@@ -412,7 +428,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "누리 전체에서 칼로리, 영양소, 그램, 시간, 광고를 숨겨요."
+            "value" : "누리 전체에서 칼로리, 영양소, 그램, 운동 시간, 광고를 숨겨요."
           }
         }
       }
@@ -429,22 +445,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "만 18세 이상이에요"
-          }
-        }
-      }
-    },
-    "Log meals, watch your world grow, and get a plan that fits your week. Your data stays yours." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log meals, watch your world grow, and get a plan that fits your week. Your data stays yours."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "식사를 기록하고, 나만의 세계가 자라는 것을 보고, 내 한 주에 맞는 계획을 받아 보세요. 내 데이터는 나의 것이에요."
           }
         }
       }
@@ -476,23 +476,23 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "마이 누리"
+            "value" : "내 누리"
           }
         }
       }
     },
-    "Needed to run Nuri. This is health information, kept private and never sold or used for ads. Export or delete it anytime." : {
+    "Needed to run Nuri. This is health information, kept private and never sold or used to target ads. Export or delete it anytime." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Needed to run Nuri. This is health information, kept private and never sold or used for ads. Export or delete it anytime."
+            "value" : "Needed to run Nuri. This is health information, kept private and never sold or used to target ads. Export or delete it anytime."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "누리를 사용하려면 필요해요. 건강 정보이므로 비공개로 보관하며 판매하거나 광고에 사용하지 않아요. 언제든 내보내거나 삭제할 수 있어요."
+            "value" : "누리를 사용하려면 필요해요. 건강 정보이므로 비공개로 보관하며 판매하거나 맞춤 광고에 사용하지 않아요. 언제든 내보내거나 삭제할 수 있어요."
           }
         }
       }
@@ -556,7 +556,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "누리는 일반적인 웰니스 추정치를 제공하며 의학적 조언이 아니에요. 음식의 열량과 영양소, 운동량은 사람, 조리 방법, 기기에 따라 달라요. 의학적 또는 영양 관련 조언은 자격을 갖춘 전문가와 상담하세요."
+            "value" : "누리가 제공하는 정보는 일반적인 웰니스 추정치이며 의학적 조언이 아니에요. 음식의 열량과 영양소, 운동량은 사람, 조리 방법, 기기에 따라 달라요. 의학적 또는 영양 관련 조언은 의료 전문가와 상담하세요."
           }
         }
       }
@@ -572,7 +572,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "누리는 성인을 위한 앱이에요."
+            "value" : "누리는 만 18세 이상을 위한 앱이에요."
           }
         }
       }
@@ -721,18 +721,18 @@
         }
       }
     },
-    "Selling your data, using it for ads, or sharing it without your permission." : {
+    "Selling your data, using it to target ads, or sharing it without your permission." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selling your data, using it for ads, or sharing it without your permission."
+            "value" : "Selling your data, using it to target ads, or sharing it without your permission."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "데이터 판매, 광고에 사용, 동의 없는 공유."
+            "value" : "데이터 판매, 맞춤 광고에 사용, 동의 없는 공유."
           }
         }
       }
@@ -892,7 +892,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "내 한 주에 맞는 계획을 제안하기 위해서예요."
+            "value" : "내 한 주에 맞는 플랜을 제안하기 위해서예요."
           }
         }
       }
@@ -1036,7 +1036,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "플랜을 준비하고 있어요"
+            "value" : "플랜이 곧 준비돼요"
           }
         }
       }

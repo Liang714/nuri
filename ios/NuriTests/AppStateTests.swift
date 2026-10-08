@@ -50,6 +50,35 @@ import Testing
         #expect(AppState(defaults: d).stage == .welcome)
     }
 
+    @Test func chooseGuestOnlyActsFromWelcome() throws {
+        let s = AppState(defaults: freshDefaults())
+        try s.recordConsent(adult: true, healthData: true, analytics: false)
+        s.chooseGuest()
+        #expect(s.stage == .complete)
+    }
+
+    @Test func staleConsentVersionSendsPersonBackToConsent() throws {
+        let d = freshDefaults()
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let stale = ConsentRecord(adultConfirmed: true, healthDataConsented: true, analyticsOptIn: false,
+                                  consentVersion: "old", recordedAt: Date(timeIntervalSince1970: 1_700_000_000))
+        d.set(try encoder.encode(stale), forKey: "consent.record")
+        d.set("complete", forKey: "onboarding.stage")
+        let relaunched = AppState(defaults: d)
+        #expect(relaunched.stage == .consent)
+        #expect(relaunched.consent == stale)
+    }
+
+    @Test func consentRecordIsStoredWithISO8601Date() throws {
+        let d = freshDefaults()
+        let s = AppState(defaults: d)
+        try s.recordConsent(adult: true, healthData: true, analytics: false, now: Date(timeIntervalSince1970: 1_800_000_000))
+        let data = try #require(d.data(forKey: "consent.record"))
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains("2027-01-15T08:00:00Z"))
+    }
+
     @Test func hideNumbersPersists() {
         let d = freshDefaults()
         AppState(defaults: d).setHideNumbers(true)
