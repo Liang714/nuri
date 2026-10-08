@@ -387,6 +387,66 @@ import NutritionEngine
         #expect(a.minutesLow == 10 && a.minutesHigh == 15) // 25 moderate-equivalent → 12.5 vigorous
     }
 
+    @Test func sessionCapShortensStrength() throws {
+        let p = try plan { $0.maxSessionMinutes = 20 }
+        let strength = try #require(p.items.first { $0.kind == .strength })
+        #expect(strength.minutesLow == 15 && strength.minutesHigh == 20)
+        #expect(p.notices.contains(.cappedAtSessionMaximum))
+    }
+
+    @Test func tinySessionCapDropsStrengthKeepsBalance() throws {
+        let p = try plan { $0.profile.ageYears = 70; $0.maxSessionMinutes = 12 }
+        #expect(!p.items.contains { $0.kind == .strength })
+        let balance = try #require(p.items.first { $0.kind == .balance })
+        #expect(balance.minutesLow == 10 && balance.minutesHigh == 12)
+        #expect(p.items.allSatisfy { $0.minutesHigh <= 12 })
+    }
+
+    @Test func sessionCapNoticeFromStrengthWhenAerobicIsOmitted() throws {
+        // Weekly goal reached → no aerobic item, so the notice can only come from the strength block.
+        let shortened = try plan { $0.week.moderateEquivalentMinutes = 160; $0.maxSessionMinutes = 20 }
+        #expect(aerobic(shortened) == nil)
+        let s = try #require(shortened.items.first { $0.kind == .strength })
+        #expect(s.minutesLow == 15 && s.minutesHigh == 20)
+        #expect(shortened.notices.filter { $0 == .cappedAtSessionMaximum }.count == 1)
+
+        let dropped = try plan { $0.week.moderateEquivalentMinutes = 160; $0.maxSessionMinutes = 10 }
+        #expect(!dropped.items.contains { $0.kind == .strength })
+        #expect(dropped.notices.filter { $0 == .cappedAtSessionMaximum }.count == 1)
+        #expect(!dropped.notices.contains(.limitedByAvailableTime))
+    }
+
+    @Test func sessionCapNoticeFromBalanceWhenAerobicIsOmitted() throws {
+        // Strength is not due (two sessions done), so only the balance block can report the cap.
+        let p = try plan {
+            $0.profile.ageYears = 70
+            $0.week.moderateEquivalentMinutes = 160
+            $0.week.strengthSessions = 2
+            $0.maxSessionMinutes = 12
+        }
+        #expect(p.items.count == 1)
+        let b = try #require(p.items.first { $0.kind == .balance })
+        #expect(b.minutesLow == 10 && b.minutesHigh == 12)
+        #expect(p.notices.filter { $0 == .cappedAtSessionMaximum }.count == 1)
+    }
+
+    @Test func strengthShortenedByBudgetIsNotReportedAsSessionCap() throws {
+        // 20 min available, default 60-minute cap: the budget binds, as before (silent shortening, no cap notice).
+        let p = try plan { $0.week.moderateEquivalentMinutes = 160; $0.availableMinutesToday = 20 }
+        let s = try #require(p.items.first { $0.kind == .strength })
+        #expect(s.minutesLow == 15 && s.minutesHigh == 20)
+        #expect(!p.notices.contains(.cappedAtSessionMaximum))
+        // Budget below 15 drops it: still limitedByAvailableTime, even with a tight cap as well.
+        let dropped = try plan {
+            $0.week.moderateEquivalentMinutes = 160
+            $0.availableMinutesToday = 12
+            $0.maxSessionMinutes = 10
+        }
+        #expect(!dropped.items.contains { $0.kind == .strength })
+        #expect(dropped.notices.contains(.limitedByAvailableTime))
+        #expect(!dropped.notices.contains(.cappedAtSessionMaximum))
+    }
+
     @Test func strengthSkippedRightAfterStrengthDayWhenTimeRemains() throws {
         let p = try plan { $0.week.didStrengthYesterday = true }
         #expect(!p.items.contains { $0.kind == .strength })
@@ -448,7 +508,7 @@ import NutritionEngine
             for item in p.items {
                 let activity = catalog.activity(id: item.activityId)
                 if item.minutesLow < 1 || item.minutesLow > item.minutesHigh { fail("bad range") }
-                if item.kind == .aerobic && item.minutesHigh > sessionCap { fail("aerobic over session cap") }
+                if item.minutesHigh > sessionCap { fail("\(item.kind) over session cap") }
                 if item.intensity != Intensity.forMET(item.met) { fail("label is not the MET band") }
                 if item.intensity == .vigorous {
                     seen["vigorous", default: 0] += 1

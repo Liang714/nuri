@@ -98,6 +98,9 @@ public enum MovementPlanner {
         func noteLimitedByTime() {
             if !notices.contains(.limitedByAvailableTime) { notices.append(.limitedByAvailableTime) }
         }
+        func noteCappedBySession() {
+            if !notices.contains(.cappedAtSessionMaximum) { notices.append(.cappedAtSessionMaximum) }
+        }
         var rationale: [PlanRationale] = [.whoPhysicalActivity2020]
         let days = Double(max(1, min(7, input.daysRemainingInWeekIncludingToday)))
 
@@ -172,12 +175,18 @@ public enum MovementPlanner {
            let activity = choose(.strength, input: input, catalog: catalog, requireLowImpact: requireLowImpact,
                                  allowVigorous: false),
            let met = activity.met.moderate {
-            if budget >= 15 {
-                let high = Int(min(25, budget))
+            // Like the aerobic item, strength never exceeds the session cap (15 min minimum, 25 min at most).
+            let strengthLimit = min(budget, sessionCap)
+            if strengthLimit >= 15 {
+                let high = Int(min(25, strengthLimit))
+                // Only the binding limit is reported: the session cap, when it is tighter than the budget.
+                if sessionCap < min(25, budget) { noteCappedBySession() }
                 items.append(fixedItem(.strength, activity: activity, met: met, low: 15, high: high, input: input))
                 budget -= Double(high)
-            } else {
+            } else if budget < 15 {
                 noteLimitedByTime()
+            } else {
+                noteCappedBySession()
             }
         }
 
@@ -185,8 +194,11 @@ public enum MovementPlanner {
            !input.mobility.contains(.seatedOnly),
            let activity = catalog.activity(id: "tai_chi"),
            let met = activity.met.light {
-            if budget >= 10 {
-                let high = Int(min(15, budget))
+            // The session cap is at least 10 min, so only the budget can drop balance; the cap can still shorten it.
+            let balanceLimit = min(budget, sessionCap)
+            if balanceLimit >= 10 {
+                let high = Int(min(15, balanceLimit))
+                if sessionCap < min(15, budget) { noteCappedBySession() }
                 items.append(fixedItem(.balance, activity: activity, met: met, low: 10, high: high, input: input))
                 budget -= Double(high)
             } else {
