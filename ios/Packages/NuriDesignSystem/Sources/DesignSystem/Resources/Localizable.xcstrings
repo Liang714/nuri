@@ -1,0 +1,11 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Why this ad, and hide options" : {
+      "localizations" : {
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 광고가 표시되는 이유와 숨기기 옵션" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
