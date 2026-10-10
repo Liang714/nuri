@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// An ad. Label first ("Ad · Partner" / "광고 · Partner"), solid neutral outline, a 44 pt "Why this ad" button.
-/// Callers must never show this when numbers are hidden or next to totals.
+///
+/// Gates itself on Hide numbers (`EnvironmentValues.nuriHideNumbers`): when numbers are hidden it renders nothing,
+/// so callers cannot show an ad by mistake. Callers must still never place it next to totals.
 public struct AdCard: View {
     private let label: Text
     private let title: Text
@@ -9,6 +11,7 @@ public struct AdCard: View {
     private let ctaTitle: Text
     private let onOpen: () -> Void
     private let onWhy: () -> Void
+    @Environment(\.nuriHideNumbers) private var hideNumbers
 
     public init(label: Text, title: Text, subtitle: Text, ctaTitle: Text, onOpen: @escaping () -> Void, onWhy: @escaping () -> Void) {
         self.label = label
@@ -19,7 +22,16 @@ public struct AdCard: View {
         self.onWhy = onWhy
     }
 
+    @ViewBuilder
     public var body: some View {
+        if hideNumbers {
+            EmptyView()
+        } else {
+            card
+        }
+    }
+
+    private var card: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 label.font(.nuriFootnoteEmphasis).foregroundStyle(Color.nuriAdLabel)
