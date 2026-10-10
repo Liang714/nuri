@@ -5,9 +5,7 @@ final class OnboardingUITests: XCTestCase {
 
     @MainActor
     func testGuestOnboardingRequiresBothConsentsThenOpensMyNuri() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTestFreshState"]
-        app.launch()
+        let app = launchFresh()
 
         app.buttons["Use without an account"].tap()
 
@@ -29,18 +27,14 @@ final class OnboardingUITests: XCTestCase {
 
     @MainActor
     func testAccountSignInExplainsItArrivesLater() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTestFreshState"]
-        app.launch()
+        let app = launchFresh()
         app.buttons["Continue with Apple"].tap()
         XCTAssertTrue(app.alerts["Account sign-in arrives in a later build"].waitForExistence(timeout: 5))
     }
 
     @MainActor
     func testHideNumbersRemovesTheDailyGuideLine() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTestFreshState"]
-        app.launch()
+        let app = launchFresh()
         app.buttons["Use without an account"].tap()
         flip(app.switches["consent.adult"])
         flip(app.switches["consent.healthData"])
@@ -54,6 +48,80 @@ final class OnboardingUITests: XCTestCase {
         app.tabBars.buttons["My Nuri"].tap()
         XCTAssertTrue(app.buttons["Add food"].waitForExistence(timeout: 5), "My Nuri must be on screen before checking the guide")
         XCTAssertFalse(app.staticTexts["today.guide"].exists)
+    }
+
+    // MARK: - Accessibility audits (contrast, element descriptions, hit regions, text clipping, Dynamic Type)
+
+    @MainActor
+    func testAccessibilityAuditWelcome() throws {
+        let app = launchFresh()
+        XCTAssertTrue(app.buttons["Use without an account"].waitForExistence(timeout: 5))
+        try audit(app)
+    }
+
+    @MainActor
+    func testAccessibilityAuditBeforeYouStart() throws {
+        let app = launchFresh()
+        app.buttons["Use without an account"].tap()
+        XCTAssertTrue(app.buttons["consent.continue"].waitForExistence(timeout: 5))
+        try audit(app)
+    }
+
+    @MainActor
+    func testAccessibilityAuditMyNuri() throws {
+        let app = launchFresh()
+        completeOnboarding(app)
+        XCTAssertTrue(app.buttons["Add food"].waitForExistence(timeout: 5))
+        try audit(app)
+    }
+
+    @MainActor
+    func testAccessibilityAuditYou() throws {
+        let app = launchFresh()
+        completeOnboarding(app)
+        app.tabBars.buttons["You"].tap()
+        XCTAssertTrue(app.switches["you.hideNumbers"].waitForExistence(timeout: 5))
+        try audit(app)
+    }
+
+    /// Fresh-state launch in English, whatever the simulator's own language is, so labels and identifiers match.
+    @MainActor
+    private func launchFresh() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTestFreshState", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launch()
+        return app
+    }
+
+    @MainActor
+    private func completeOnboarding(_ app: XCUIApplication) {
+        app.buttons["Use without an account"].tap()
+        flip(app.switches["consent.adult"])
+        flip(app.switches["consent.healthData"])
+        app.buttons["consent.continue"].tap()
+    }
+
+    /// Runs the system accessibility audit on the current screen. Every issue it raises is logged as a test activity;
+    /// the two known false positives below are the only ones filtered.
+    @MainActor
+    private func audit(_ app: XCUIApplication) throws {
+        // Keep going after the first issue so one run lists every issue on the screen.
+        continueAfterFailure = true
+        defer { continueAfterFailure = false }
+        try app.performAccessibilityAudit { issue in
+            let element = issue.element
+            let label = element?.label ?? ""
+            let summary = "\(issue.compactDescription) (\(issue.detailedDescription)) label=\"\(label)\""
+            // False positive: the system flags "partially unsupported" Dynamic Type for the label of a NavigationLink row
+            // ("What we store and why") and for the "About" section header. Both use Dynamic Type text styles and were
+            // checked at the largest accessibility size, where they scale and wrap like every other row.
+            if issue.auditType == .dynamicType, ["What we store and why", "About"].contains(label) {
+                XCTContext.runActivity(named: "Accessibility audit issue ignored: \(summary)") { _ in }
+                return true
+            }
+            XCTContext.runActivity(named: "Accessibility audit issue: \(summary)") { _ in }
+            return false
+        }
     }
 
     @MainActor

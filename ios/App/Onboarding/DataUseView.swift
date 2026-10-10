@@ -9,9 +9,7 @@ struct DataUseView: View {
             item("Your profile", "Age, height and weight, only to estimate your daily guide.", symbol: "person")
             item("Never", "Selling your data, using it to target ads, or sharing it without your permission.", symbol: "hand.raised")
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .background(Color.nuriGround.ignoresSafeArea())
+        .nuriGroupedList()
         .navigationTitle(Text("What we store and why"))
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -19,8 +17,8 @@ struct DataUseView: View {
     private func item(_ title: LocalizedStringKey, _ detail: LocalizedStringKey, symbol: String) -> some View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.nuriBodyEmphasis)
-                Text(detail).font(.nuriFootnote).foregroundStyle(Color.nuriInkSoft)
+                Text(title).font(.nuriBodyEmphasis).foregroundStyle(Color.nuriInk)
+                Text(detail).nuriSecondaryText()
             }
         } icon: {
             Image(systemName: symbol).foregroundStyle(Color.nuriTint)

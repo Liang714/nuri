@@ -6,6 +6,13 @@ struct WelcomeView: View {
     var onEmail: () -> Void
     var onWithoutAccount: () -> Void
     @State private var showAccountsLater = false
+    @Environment(\.locale) private var locale
+    /// The 누리 logotype is the one size not taken from a text style (40 pt at the default setting). It scales with Dynamic Type
+    /// like the text around it; the accessibility audit flags a capped size as only partly supported.
+    @ScaledMetric(relativeTo: .largeTitle) private var logoSize: CGFloat = 40
+
+    /// The wordmark as spoken: the Korean name in a Korean UI, otherwise "Nuri".
+    private var logotypeLabel: String { locale.language.languageCode == .korean ? "누리" : "Nuri" }
 
     var body: some View {
         GeometryReader { proxy in
@@ -17,11 +24,11 @@ struct WelcomeView: View {
                             .frame(width: 196, height: 196)
                             .padding(.top, 40)
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
-                            Text(verbatim: "누리").font(.system(size: 40)).foregroundStyle(Color.nuriTint)
+                            Text(verbatim: "누리").font(.system(size: logoSize)).foregroundStyle(Color.nuriTint)
                             Text(verbatim: "Nuri").font(.nuriTitle2).foregroundStyle(Color.nuriTint)
                         }
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(Text(verbatim: "Nuri"))
+                        .accessibilityLabel(Text(verbatim: logotypeLabel))
                         .accessibilityAddTraits(.isHeader)
                         Text("Food and movement, gently")
                             .font(.nuriTitle)

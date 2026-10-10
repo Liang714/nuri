@@ -7,9 +7,13 @@ struct AddFoodSheet: View {
     var body: some View {
         NavigationStack {
             ContentUnavailableView {
-                Label("Food search is on its way", systemImage: "magnifyingglass")
+                Label {
+                    Text("Food search is on its way").foregroundStyle(Color.nuriInk)
+                } icon: {
+                    Image(systemName: "magnifyingglass").foregroundStyle(Color.nuriInkSoft)
+                }
             } description: {
-                Text("Search, barcode and label scanning arrive with the food database.")
+                Text("Search, barcode and label scanning arrive with the food database.").foregroundStyle(Color.nuriInkSoft)
             }
             .background(Color.nuriGround.ignoresSafeArea())
             .navigationTitle(Text("Add food"))

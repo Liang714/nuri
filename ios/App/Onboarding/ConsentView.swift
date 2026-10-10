@@ -21,26 +21,23 @@ struct ConsentView: View {
                 }
                 .accessibilityIdentifier("consent.healthData")
                 .listRowBackground(Color.nuriSurface)
-                NavigationLink { DataUseView() } label: { Text("What we store and why") }
+                NavigationLink { DataUseView() } label: { Text("What we store and why").font(.nuriBody).foregroundStyle(Color.nuriInk) }
                     .listRowBackground(Color.nuriSurface)
-            } header: { Text("Required") }
+            } header: { NuriSectionHeader(Text("Required")) }
 
             Section {
                 Toggle(isOn: $analytics) { row("Share anonymous usage stats", "Helps improve Nuri. Never includes foods, notes or health data.") }
                     .accessibilityIdentifier("consent.analytics")
                     .listRowBackground(Color.nuriSurface)
-            } header: { Text("Optional") }
+            } header: { NuriSectionHeader(Text("Optional")) }
 
             Section {
                 Text("Nuri gives general wellness estimates, not medical advice. Food energy, nutrients and exercise vary by person, preparation and device. For medical or nutrition guidance, talk to a qualified clinician.")
-                    .font(.nuriFootnote)
-                    .foregroundStyle(Color.nuriInkSoft)
+                    .nuriSecondaryText()
                     .listRowBackground(Color.nuriSurface)
             }
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .background(Color.nuriGround.ignoresSafeArea())
+        .nuriGroupedList()
         .navigationTitle(Text("Before you start"))
         .navigationBarTitleDisplayMode(.large)
         .safeAreaInset(edge: .bottom) {
@@ -53,8 +50,7 @@ struct ConsentView: View {
                 .accessibilityIdentifier("consent.continue")
                 if !ready {
                     Text("Turn on the two required items to continue.")
-                        .font(.nuriFootnote)
-                        .foregroundStyle(Color.nuriInkSoft)
+                        .nuriSecondaryText()
                 }
             }
             .padding(.horizontal, NuriMetrics.screenMargin)
@@ -65,8 +61,8 @@ struct ConsentView: View {
 
     private func row(_ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.nuriBodyEmphasis)
-            Text(detail).font(.nuriFootnote).foregroundStyle(Color.nuriInkSoft)
+            Text(title).font(.nuriBodyEmphasis).foregroundStyle(Color.nuriInk)
+            Text(detail).nuriSecondaryText()
         }
     }
 }
