@@ -1,3 +1,7 @@
+// Before shipping a V2 that changes any model: freeze V1's model definitions as nested types under `NuriSchemaV1`
+// (Apple's VersionedSchema pattern: each version owns its own @Model classes), point the app at the new top-level
+// models, and add a `MigrationStage` to `NuriMigrationPlan.stages`. Today the models below are V1 and the plan has
+// no stages, which is only correct while V1 is the only version that has ever shipped.
 import Foundation
 import SwiftData
 

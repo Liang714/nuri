@@ -117,6 +117,17 @@ import Testing
         #expect(try fx.repository.draft()?.activityLevel == .sedentary)
     }
 
+    @Test func anUnknownReadinessAnswerStillNeedsClearance() throws {
+        let fx = try Fixture()
+        fx.context.insert(ProfileRecord(birthYear: 1990, sexForEquation: nil, heightCm: 170, weightKg: 65,
+                                        activityLevel: "lightlyActive", goal: "maintain", unitSystem: "metric", bmiStandard: "who",
+                                        readinessYes: ["someFutureQuestion"]))
+        try fx.context.save()
+        let draft = try #require(try fx.repository.draft())
+        #expect(draft.readinessYes == [.otherMedicalReason])
+        #expect(draft.readiness.needsClearance)
+    }
+
     @Test func otherUnknownRawValuesFallBackToSafeDefaults() throws {
         let fx = try Fixture()
         fx.context.insert(ProfileRecord(birthYear: 1985, sexForEquation: "robot", heightCm: 170, weightKg: 65,
@@ -130,7 +141,9 @@ import Testing
         #expect(draft.goal == .maintain)
         #expect(draft.unitSystem == .metric)
         #expect(draft.bmiStandard == .who)
-        #expect(draft.readinessYes == [.heartCondition, .pregnancy])
+        // An unknown readiness answer is kept as a "yes" (otherMedicalReason) so clearance is never silently dropped.
+        #expect(draft.readinessYes == [.heartCondition, .pregnancy, .otherMedicalReason])
+        #expect(draft.readiness.needsClearance)
         #expect(draft.mobility == [.seatedOnly])
         #expect(draft.activityLevel == .lightlyActive)
     }

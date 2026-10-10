@@ -170,9 +170,11 @@ public final class ConsentEventRecord {
     public var consentVersion: String
     public var localeIdentifier: String
     public var recordedAt: Date
+    /// Append order (1, 2, 3, ...), so events with equal `recordedAt` (or a clock that moved) still read back in the order they happened.
+    public var sequence: Int
 
     public init(kind: String, adultConfirmed: Bool, healthDataConsented: Bool, analyticsOptIn: Bool, consentVersion: String,
-                localeIdentifier: String, recordedAt: Date) {
+                localeIdentifier: String, recordedAt: Date, sequence: Int = 0) {
         self.kind = kind
         self.adultConfirmed = adultConfirmed
         self.healthDataConsented = healthDataConsented
@@ -180,5 +182,6 @@ public final class ConsentEventRecord {
         self.consentVersion = consentVersion
         self.localeIdentifier = localeIdentifier
         self.recordedAt = recordedAt
+        self.sequence = sequence
     }
 }

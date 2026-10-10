@@ -74,4 +74,49 @@ import Testing
         try DataWiper.deleteEverything(in: context)
         #expect(try counts(context) == [0, 0, 0, 0, 0])
     }
+
+    @Test func deleteEverythingAlsoRemovesTheExportFolder() throws {
+        defer { try? FileManager.default.removeItem(at: DataExport.exportDirectory) }
+        let container = try NuriStore.makeContainer(inMemory: true)
+        let context = container.mainContext
+        try populate(context)
+        let files = try DataExport.files(from: context, exportedAt: Date(timeIntervalSince1970: 1_800_100_000))
+        let urls = try DataExport.writeToExportDirectory(files)
+        #expect(FileManager.default.fileExists(atPath: DataExport.exportDirectory.path))
+        #expect(urls.allSatisfy { FileManager.default.fileExists(atPath: $0.path) })
+
+        try DataWiper.deleteEverything(in: context)
+
+        #expect(FileManager.default.fileExists(atPath: DataExport.exportDirectory.path) == false)
+        #expect(urls.allSatisfy { FileManager.default.fileExists(atPath: $0.path) == false })
+        #expect(try counts(context) == [0, 0, 0, 0, 0])
+    }
+
+    @Test func deleteEverythingWithoutAnExportFolderIsHarmless() throws {
+        try? FileManager.default.removeItem(at: DataExport.exportDirectory)
+        let container = try NuriStore.makeContainer(inMemory: true)
+        try populate(container.mainContext)
+        try DataWiper.deleteEverything(in: container.mainContext)
+        #expect(try counts(container.mainContext) == [0, 0, 0, 0, 0])
+    }
+
+    @Test func deleteEverythingEmptiesAnOnDiskStore() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("nuri-store-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("nuri.store")
+
+        do {
+            let container = try NuriStore.makeContainer(url: url)
+            try populate(container.mainContext)
+        }
+        do {
+            // A new container on the same URL sees what was saved, so the wipe below is not vacuous.
+            let container = try NuriStore.makeContainer(url: url)
+            #expect(try counts(container.mainContext) == [1, 2, 2, 1, 2])
+            try DataWiper.deleteEverything(in: container.mainContext)
+        }
+        let reopened = try NuriStore.makeContainer(url: url)
+        #expect(try counts(reopened.mainContext) == [0, 0, 0, 0, 0])
+    }
 }

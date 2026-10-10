@@ -102,7 +102,7 @@ public final class ProfileRepository {
         try context.save()
     }
 
-    /// Unknown raw values (a newer or damaged store) fall back to safe defaults; unknown set entries are dropped.
+    /// Unknown raw values (a newer or damaged store) fall back to safe defaults; unknown mobility entries are dropped.
     private static func draft(from record: ProfileRecord) -> ProfileDraft {
         ProfileDraft(
             birthYear: record.birthYear,
@@ -117,7 +117,8 @@ public final class ProfileRepository {
             activityShare: record.activityShare,
             manualTargetKcal: record.manualTargetKcal,
             tracksWithoutGuide: record.tracksWithoutGuide,
-            readinessYes: Set(record.readinessYes.compactMap(ReadinessQuestion.init(rawValue:))),
+            // An answer this build cannot read is kept as a "yes" (other medical reason) so clearance advice is never dropped.
+            readinessYes: Set(record.readinessYes.map { ReadinessQuestion(rawValue: $0) ?? .otherMedicalReason }),
             preferredActivityIDs: record.preferredActivityIDs,
             equipment: Set(record.equipment),
             mobility: Set(record.mobility.compactMap(MobilityPreference.init(rawValue:)))

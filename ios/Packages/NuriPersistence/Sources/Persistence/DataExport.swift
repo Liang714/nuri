@@ -21,7 +21,10 @@ public enum DataExport {
 
     /// The six files, in a fixed order.
     public static func files(from context: ModelContext, exportedAt: Date) throws -> [ExportFile] {
-        let profile = try ProfileRepository(context: context).current().map(ProfileDTO.init)
+        // Every profile record is exported (normally one); the app itself reads only the most recently updated.
+        let profiles = try context.fetch(FetchDescriptor<ProfileRecord>())
+            .sorted { ($0.updatedAt, $0.birthYear) < ($1.updatedAt, $1.birthYear) }
+            .map(ProfileDTO.init)
         let foods = try context.fetch(FetchDescriptor<FoodRecord>())
             .sorted { ($0.createdAt, $0.name, $0.id.uuidString) < ($1.createdAt, $1.name, $1.id.uuidString) }
         let meals = try context.fetch(FetchDescriptor<MealEntryRecord>())
@@ -29,29 +32,51 @@ public enum DataExport {
         let activities = try context.fetch(FetchDescriptor<ActivityLogRecord>())
             .sorted { ($0.startAt, $0.createdAt, $0.id.uuidString) < ($1.startAt, $1.createdAt, $1.id.uuidString) }
         let consent = try context.fetch(FetchDescriptor<ConsentEventRecord>())
-            .sorted { ($0.recordedAt, $0.kind) < ($1.recordedAt, $1.kind) }
+            .sorted { ($0.recordedAt, $0.sequence) < ($1.recordedAt, $1.sequence) }
             .map(ConsentEventDTO.init)
 
-        let backup = FullBackupDTO(schemaVersion: schemaVersion, exportedAt: exportedAt, profile: profile,
+        let backup = FullBackupDTO(schemaVersion: schemaVersion, exportedAt: exportedAt, profiles: profiles,
                                    foods: foods.map(FoodDTO.init), mealEntries: meals.map(MealEntryDTO.init),
                                    activities: activities.map(ActivityDTO.init), consentEvents: consent)
         let encoder = jsonEncoder()
         return [
-            ExportFile(name: "profile.json", data: try encoder.encode(profile)),
-            ExportFile(name: "foods.csv", data: Data(foodsCSV(foods).utf8)),
-            ExportFile(name: "meal_entries.csv", data: Data(mealEntriesCSV(meals).utf8)),
-            ExportFile(name: "activities.csv", data: Data(activitiesCSV(activities).utf8)),
+            ExportFile(name: "profile.json", data: try encoder.encode(profiles)),
+            ExportFile(name: "foods.csv", data: csvData(foodsCSV(foods))),
+            ExportFile(name: "meal_entries.csv", data: csvData(mealEntriesCSV(meals))),
+            ExportFile(name: "activities.csv", data: csvData(activitiesCSV(activities))),
             ExportFile(name: "consent_events.json", data: try encoder.encode(consent)),
             ExportFile(name: "full_backup.json", data: try encoder.encode(backup)),
         ]
     }
 
+    /// Where exports are written for sharing. A fixed folder in the temporary directory, so "Delete everything" can find and remove it.
+    public static var exportDirectory: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("NuriExport", isDirectory: true)
+    }
+
+    /// Replaces `exportDirectory` with a fresh folder holding `files` (nothing from an earlier export survives) and returns their URLs.
+    public static func writeToExportDirectory(_ files: [ExportFile]) throws -> [URL] {
+        try removeExportDirectory()
+        return try write(files, to: exportDirectory)
+    }
+
+    /// Removes `exportDirectory` and everything in it, if it exists.
+    public static func removeExportDirectory() throws {
+        guard FileManager.default.fileExists(atPath: exportDirectory.path) else { return }
+        try FileManager.default.removeItem(at: exportDirectory)
+    }
+
     /// Writes every file into `directory` (created if needed, existing files replaced) and returns their URLs in order.
     public static func write(_ files: [ExportFile], to directory: URL) throws -> [URL] {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        #if os(iOS)
+        let options: Data.WritingOptions = [.atomic, .completeFileProtection]
+        #else
+        let options: Data.WritingOptions = .atomic
+        #endif
         return try files.map { file in
             let url = directory.appendingPathComponent(file.name, isDirectory: false)
-            try file.data.write(to: url, options: .atomic)
+            try file.data.write(to: url, options: options)
             return url
         }
     }
@@ -63,6 +88,11 @@ public enum DataExport {
     }
 
     // MARK: CSV
+
+    /// CSV files start with a UTF-8 byte order mark so Excel opens Korean text as UTF-8 instead of the system code page.
+    private static func csvData(_ text: String) -> Data {
+        Data([0xEF, 0xBB, 0xBF]) + Data(text.utf8)
+    }
 
     private static func foodsCSV(_ foods: [FoodRecord]) -> String {
         csv([[
@@ -165,6 +195,7 @@ struct ProfileDTO: Codable, Equatable {
     var preferredActivityIDs: [String]
     var equipment: [String]
     var mobility: [String]
+    var updatedAt: Date
 
     init(_ record: ProfileRecord) {
         birthYear = record.birthYear
@@ -183,11 +214,12 @@ struct ProfileDTO: Codable, Equatable {
         preferredActivityIDs = record.preferredActivityIDs
         equipment = record.equipment
         mobility = record.mobility
+        updatedAt = record.updatedAt
     }
 
     enum CodingKeys: String, CodingKey {
         case birthYear, sex, heightCm, weightKg, activityLevel, goal, unitSystem, bmiStandard, lossDeficitKcal, activityShare,
-             manualTargetKcal, tracksWithoutGuide, readinessYes, preferredActivityIDs, equipment, mobility
+             manualTargetKcal, tracksWithoutGuide, readinessYes, preferredActivityIDs, equipment, mobility, updatedAt
     }
 
     func encode(to encoder: any Encoder) throws {
@@ -208,6 +240,7 @@ struct ProfileDTO: Codable, Equatable {
         try c.encode(preferredActivityIDs, forKey: .preferredActivityIDs)
         try c.encode(equipment, forKey: .equipment)
         try c.encode(mobility, forKey: .mobility)
+        try c.encode(updatedAt, forKey: .updatedAt)
     }
 }
 
@@ -393,6 +426,7 @@ struct ConsentEventDTO: Codable, Equatable {
     var consentVersion: String
     var localeIdentifier: String
     var recordedAt: Date
+    var sequence: Int
 
     init(_ record: ConsentEventRecord) {
         kind = record.kind
@@ -402,23 +436,24 @@ struct ConsentEventDTO: Codable, Equatable {
         consentVersion = record.consentVersion
         localeIdentifier = record.localeIdentifier
         recordedAt = record.recordedAt
+        sequence = record.sequence
     }
 }
 
 struct FullBackupDTO: Codable, Equatable {
     var schemaVersion: Int
     var exportedAt: Date
-    var profile: ProfileDTO?
+    var profiles: [ProfileDTO]
     var foods: [FoodDTO]
     var mealEntries: [MealEntryDTO]
     var activities: [ActivityDTO]
     var consentEvents: [ConsentEventDTO]
 
-    init(schemaVersion: Int, exportedAt: Date, profile: ProfileDTO?, foods: [FoodDTO], mealEntries: [MealEntryDTO],
+    init(schemaVersion: Int, exportedAt: Date, profiles: [ProfileDTO], foods: [FoodDTO], mealEntries: [MealEntryDTO],
          activities: [ActivityDTO], consentEvents: [ConsentEventDTO]) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
-        self.profile = profile
+        self.profiles = profiles
         self.foods = foods
         self.mealEntries = mealEntries
         self.activities = activities
@@ -426,14 +461,14 @@ struct FullBackupDTO: Codable, Equatable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case schemaVersion, exportedAt, profile, foods, mealEntries, activities, consentEvents
+        case schemaVersion, exportedAt, profiles, foods, mealEntries, activities, consentEvents
     }
 
     func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(schemaVersion, forKey: .schemaVersion)
         try c.encode(exportedAt, forKey: .exportedAt)
-        try c.encode(profile, forKey: .profile)
+        try c.encode(profiles, forKey: .profiles)
         try c.encode(foods, forKey: .foods)
         try c.encode(mealEntries, forKey: .mealEntries)
         try c.encode(activities, forKey: .activities)

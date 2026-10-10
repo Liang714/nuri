@@ -31,7 +31,7 @@ public struct ConsentEvent: Equatable, Sendable {
 @MainActor
 public protocol ConsentLogging {
     func append(_ event: ConsentEvent) throws
-    /// Every event, oldest first by `recordedAt`.
+    /// Every event, oldest first by `recordedAt`, then by append order.
     func events() throws -> [ConsentEvent]
 }
 
@@ -44,6 +44,9 @@ public final class SwiftDataConsentLog: ConsentLogging {
     }
 
     public func append(_ event: ConsentEvent) throws {
+        var latest = FetchDescriptor<ConsentEventRecord>(sortBy: [SortDescriptor(\.sequence, order: .reverse)])
+        latest.fetchLimit = 1
+        let next = (try context.fetch(latest).first?.sequence ?? 0) + 1
         context.insert(ConsentEventRecord(
             kind: event.kind.rawValue,
             adultConfirmed: event.adultConfirmed,
@@ -51,13 +54,14 @@ public final class SwiftDataConsentLog: ConsentLogging {
             analyticsOptIn: event.analyticsOptIn,
             consentVersion: event.consentVersion,
             localeIdentifier: event.localeIdentifier,
-            recordedAt: event.recordedAt
+            recordedAt: event.recordedAt,
+            sequence: next
         ))
         try context.save()
     }
 
     public func events() throws -> [ConsentEvent] {
-        let descriptor = FetchDescriptor<ConsentEventRecord>(sortBy: [SortDescriptor(\.recordedAt)])
+        let descriptor = FetchDescriptor<ConsentEventRecord>(sortBy: [SortDescriptor(\.recordedAt), SortDescriptor(\.sequence)])
         return try context.fetch(descriptor).compactMap { record in
             // A kind this build does not know can only come from a newer store; it is skipped, never rewritten.
             guard let kind = ConsentEvent.Kind(rawValue: record.kind) else { return nil }

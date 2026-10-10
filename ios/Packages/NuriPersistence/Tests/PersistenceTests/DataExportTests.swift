@@ -67,8 +67,16 @@ private func parseCSV(_ text: String) -> [[String]] {
         try #require(files.first { $0.name == name })
     }
 
+    static let bom = Data([0xEF, 0xBB, 0xBF])
+
+    /// CSV files must start with the UTF-8 BOM (so Excel reads Korean as UTF-8) and JSON files must not; the BOM is stripped here.
     func text(_ file: ExportFile) throws -> String {
-        try #require(String(data: file.data, encoding: .utf8))
+        if file.name.hasSuffix(".csv") {
+            #expect(file.data.prefix(3) == Self.bom, "\(file.name) must start with a UTF-8 BOM")
+            return String(decoding: file.data.dropFirst(3), as: UTF8.self)
+        }
+        #expect(file.data.prefix(3) != Self.bom, "\(file.name) must not start with a BOM")
+        return try #require(String(data: file.data, encoding: .utf8))
     }
 
     // MARK: CSV writer
@@ -98,7 +106,7 @@ private func parseCSV(_ text: String) -> [[String]] {
 
     // MARK: Empty store
 
-    @Test func emptyStoreGivesSixFilesWithHeaderOnlyCSVsAndANullProfile() throws {
+    @Test func emptyStoreGivesSixFilesWithHeaderOnlyCSVsAndNoProfiles() throws {
         let c = try container()
         let files = try DataExport.files(from: c.mainContext, exportedAt: Self.exportedAt)
 
@@ -106,7 +114,8 @@ private func parseCSV(_ text: String) -> [[String]] {
         #expect(try text(file(files, "foods.csv")) == Self.foodsHeader + "\r\n")
         #expect(try text(file(files, "meal_entries.csv")) == Self.mealsHeader + "\r\n")
         #expect(try text(file(files, "activities.csv")) == Self.activitiesHeader + "\r\n")
-        #expect(try text(file(files, "profile.json")) == "null")
+        let profiles = try #require(try JSONSerialization.jsonObject(with: file(files, "profile.json").data) as? [Any])
+        #expect(profiles.isEmpty)
         // Pretty-printed JSON writes an empty array as "[\n\n]"; what matters is that it is an empty JSON array.
         let consent = try #require(try JSONSerialization.jsonObject(with: file(files, "consent_events.json").data) as? [Any])
         #expect(consent.isEmpty)
@@ -115,12 +124,12 @@ private func parseCSV(_ text: String) -> [[String]] {
         #expect(backup.schemaVersion == 1)
         #expect(backup.schemaVersion == DataExport.schemaVersion)
         #expect(backup.exportedAt == Self.exportedAt)
-        #expect(backup.profile == nil)
+        #expect(backup.profiles.isEmpty)
         #expect(backup.foods.isEmpty && backup.mealEntries.isEmpty && backup.activities.isEmpty && backup.consentEvents.isEmpty)
 
         let object = try #require(try JSONSerialization.jsonObject(with: file(files, "full_backup.json").data) as? [String: Any])
-        #expect(object["profile"] is NSNull)
-        #expect(Set(object.keys) == ["schemaVersion", "exportedAt", "profile", "foods", "mealEntries", "activities", "consentEvents"])
+        #expect((object["profiles"] as? [Any])?.isEmpty == true)
+        #expect(Set(object.keys) == ["schemaVersion", "exportedAt", "profiles", "foods", "mealEntries", "activities", "consentEvents"])
     }
 
     // MARK: Populated store
@@ -159,9 +168,9 @@ private func parseCSV(_ text: String) -> [[String]] {
                                          energySource: "device", catalogVersion: "nuri-met-2026.1", createdAt: Self.t0,
                                          deletedAt: Self.t0.addingTimeInterval(90_000)))
         context.insert(ConsentEventRecord(kind: "withdrawn", adultConfirmed: true, healthDataConsented: false, analyticsOptIn: false,
-                                          consentVersion: "2026-10-10", localeIdentifier: "ko_KR", recordedAt: Self.t0.addingTimeInterval(10)))
+                                          consentVersion: "2026-10-10", localeIdentifier: "ko_KR", recordedAt: Self.t0.addingTimeInterval(10), sequence: 2))
         context.insert(ConsentEventRecord(kind: "granted", adultConfirmed: true, healthDataConsented: true, analyticsOptIn: true,
-                                          consentVersion: "2026-10-10", localeIdentifier: "ko_KR", recordedAt: Self.t0))
+                                          consentVersion: "2026-10-10", localeIdentifier: "ko_KR", recordedAt: Self.t0, sequence: 1))
         try context.save()
     }
 
@@ -218,7 +227,9 @@ private func parseCSV(_ text: String) -> [[String]] {
         try populate(c.mainContext)
         let files = try DataExport.files(from: c.mainContext, exportedAt: Self.exportedAt)
 
-        let profile = try #require(try JSONSerialization.jsonObject(with: file(files, "profile.json").data, options: [.fragmentsAllowed]) as? [String: Any])
+        let all = try #require(try JSONSerialization.jsonObject(with: file(files, "profile.json").data) as? [[String: Any]])
+        #expect(all.count == 1)
+        let profile = try #require(all.first)
         #expect(profile["birthYear"] as? Int == 1990)
         #expect(profile["sex"] as? String == "female")
         #expect(profile["heightCm"] as? Double == 165.5)
@@ -235,6 +246,7 @@ private func parseCSV(_ text: String) -> [[String]] {
         #expect(profile["preferredActivityIDs"] as? [String] == ["walking", "yoga"])
         #expect(profile["equipment"] as? [String] == ["bands", "mat"])
         #expect(profile["mobility"] as? [String] == ["lowImpactOnly"])
+        #expect(profile["updatedAt"] as? String == "2027-01-15T08:00:00Z")
     }
 
     @Test func fullBackupDecodesWithMatchingCountsAndNullsForMissingOptionals() throws {
@@ -246,7 +258,7 @@ private func parseCSV(_ text: String) -> [[String]] {
         let backup = try JSONDecoder.iso.decode(FullBackupDTO.self, from: data)
         #expect(backup.schemaVersion == 1)
         #expect(backup.exportedAt == Self.exportedAt)
-        #expect(backup.profile?.birthYear == 1990)
+        #expect(backup.profiles.map(\.birthYear) == [1990])
         #expect(backup.foods.count == 2)
         #expect(backup.mealEntries.count == 2)
         #expect(backup.activities.count == 2)
@@ -294,6 +306,79 @@ private func parseCSV(_ text: String) -> [[String]] {
         let files = try DataExport.files(from: context, exportedAt: Self.exportedAt)
         let names = parseCSV(try text(file(files, "meal_entries.csv"))).dropFirst().map { $0[4] }
         #expect(names == ["meal 1", "meal 2", "meal 0"])
+    }
+
+    @Test func consentExportCarriesTheSequenceAndOrdersEqualTimestampsByIt() throws {
+        let c = try container()
+        let log = SwiftDataConsentLog(context: c.mainContext)
+        let granted = ConsentEvent(kind: .granted, adultConfirmed: true, healthDataConsented: true, analyticsOptIn: false,
+                                   consentVersion: "v", localeIdentifier: "en_US", recordedAt: Self.t0)
+        var withdrawn = granted
+        withdrawn.kind = .withdrawn
+        withdrawn.healthDataConsented = false
+        // Same recordedAt (clock granularity or a clock change): append order must decide, in both the log and the export.
+        try log.append(granted)
+        try log.append(withdrawn)
+        #expect(try log.events().map(\.kind) == [.granted, .withdrawn])
+
+        let files = try DataExport.files(from: c.mainContext, exportedAt: Self.exportedAt)
+        let events = try JSONDecoder.iso.decode([ConsentEventDTO].self, from: file(files, "consent_events.json").data)
+        #expect(events.map(\.kind) == ["granted", "withdrawn"])
+        #expect(events.map(\.sequence) == [1, 2])
+        let backup = try JSONDecoder.iso.decode(FullBackupDTO.self, from: file(files, "full_backup.json").data)
+        #expect(backup.consentEvents.map(\.sequence) == [1, 2])
+    }
+
+    @Test func exportOrdersEqualTimestampsBySequenceNotInsertionOrder() throws {
+        let c = try container()
+        let context = c.mainContext
+        for number in (1...12).reversed() {
+            context.insert(ConsentEventRecord(kind: number.isMultiple(of: 2) ? "withdrawn" : "granted", adultConfirmed: true,
+                                              healthDataConsented: !number.isMultiple(of: 2), analyticsOptIn: false,
+                                              consentVersion: "v\(number)", localeIdentifier: "en_US", recordedAt: Self.t0,
+                                              sequence: number))
+        }
+        try context.save()
+        let files = try DataExport.files(from: context, exportedAt: Self.exportedAt)
+        let expected = (1...12).map { "v\($0)" }
+        let events = try JSONDecoder.iso.decode([ConsentEventDTO].self, from: file(files, "consent_events.json").data)
+        #expect(events.map(\.consentVersion) == expected)
+        let backup = try JSONDecoder.iso.decode(FullBackupDTO.self, from: file(files, "full_backup.json").data)
+        #expect(backup.consentEvents.map(\.consentVersion) == expected)
+    }
+
+    @Test func everyProfileRecordIsExportedOldestFirst() throws {
+        let c = try container()
+        let context = c.mainContext
+        for (year, offset) in [(1991, 120.0), (1990, 0.0)] {
+            context.insert(ProfileRecord(birthYear: year, sexForEquation: nil, heightCm: 170, weightKg: 65, activityLevel: "lightlyActive",
+                                         goal: "maintain", unitSystem: "metric", bmiStandard: "who",
+                                         updatedAt: Self.t0.addingTimeInterval(offset)))
+        }
+        try context.save()
+        let files = try DataExport.files(from: context, exportedAt: Self.exportedAt)
+
+        let profiles = try JSONDecoder.iso.decode([ProfileDTO].self, from: file(files, "profile.json").data)
+        #expect(profiles.map(\.birthYear) == [1990, 1991])
+        let backup = try JSONDecoder.iso.decode(FullBackupDTO.self, from: file(files, "full_backup.json").data)
+        #expect(backup.profiles == profiles)
+        // The app still reads the most recently updated one.
+        #expect(try ProfileRepository(context: context).current()?.birthYear == 1991)
+    }
+
+    @Test func csvFilesStartWithAUTF8BOMAndJSONFilesDoNot() throws {
+        let c = try container()
+        try populate(c.mainContext)
+        let files = try DataExport.files(from: c.mainContext, exportedAt: Self.exportedAt)
+        for file in files {
+            if file.name.hasSuffix(".csv") {
+                #expect(Array(file.data.prefix(3)) == [0xEF, 0xBB, 0xBF], "\(file.name)")
+                #expect(file.data.count > 3)
+            } else {
+                #expect(Array(file.data.prefix(3)) != [0xEF, 0xBB, 0xBF], "\(file.name)")
+                #expect(file.data.first == UInt8(ascii: "[") || file.data.first == UInt8(ascii: "{"), "\(file.name)")
+            }
+        }
     }
 
     // MARK: Number and date formats
@@ -375,6 +460,42 @@ private func parseCSV(_ text: String) -> [[String]] {
         _ = try DataExport.write([ExportFile(name: "a.csv", data: Data("old".utf8))], to: directory)
         let urls = try DataExport.write([ExportFile(name: "a.csv", data: Data("new".utf8))], to: directory)
         #expect(try String(contentsOf: try #require(urls.first), encoding: .utf8) == "new")
+    }
+
+    // MARK: Fixed export folder
+
+    @Test func exportDirectoryIsAFixedFolderInTheTemporaryDirectory() {
+        #expect(DataExport.exportDirectory.lastPathComponent == "NuriExport")
+        #expect(DataExport.exportDirectory.deletingLastPathComponent().standardizedFileURL
+            == FileManager.default.temporaryDirectory.standardizedFileURL)
+    }
+
+    @Test func writeToExportDirectoryReplacesTheWholeFolder() throws {
+        defer { try? FileManager.default.removeItem(at: DataExport.exportDirectory) }
+        let stale = DataExport.exportDirectory.appendingPathComponent("stale.csv")
+        try FileManager.default.createDirectory(at: DataExport.exportDirectory, withIntermediateDirectories: true)
+        try Data("old".utf8).write(to: stale)
+
+        let c = try container()
+        try populate(c.mainContext)
+        let files = try DataExport.files(from: c.mainContext, exportedAt: Self.exportedAt)
+        let urls = try DataExport.writeToExportDirectory(files)
+
+        #expect(urls.map(\.lastPathComponent) == Self.fileNames)
+        #expect(urls.allSatisfy { $0.deletingLastPathComponent().standardizedFileURL == DataExport.exportDirectory.standardizedFileURL })
+        #expect(FileManager.default.fileExists(atPath: stale.path) == false)
+        #expect(Set(try FileManager.default.contentsOfDirectory(atPath: DataExport.exportDirectory.path)) == Set(Self.fileNames))
+        for (file, url) in zip(files, urls) {
+            #expect(try Data(contentsOf: url) == file.data)
+        }
+    }
+
+    @Test func writeToExportDirectoryWorksWhenNoFolderExistsYet() throws {
+        try? FileManager.default.removeItem(at: DataExport.exportDirectory)
+        defer { try? FileManager.default.removeItem(at: DataExport.exportDirectory) }
+        let urls = try DataExport.writeToExportDirectory([ExportFile(name: "a.csv", data: Data("x".utf8))])
+        #expect(urls.count == 1)
+        #expect(FileManager.default.fileExists(atPath: try #require(urls.first).path))
     }
 }
 

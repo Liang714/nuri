@@ -45,6 +45,44 @@ import Testing
         #expect(try fx.context.fetchCount(FetchDescriptor<ConsentEventRecord>()) == 2)
     }
 
+    @Test func equalTimestampsComeBackInAppendOrder() throws {
+        let fx = try Fixture()
+        let granted = Self.granted()
+        var withdrawn = Self.withdrawn(at: Self.t0)
+        withdrawn.localeIdentifier = "en_US"
+        try fx.log.append(granted)
+        try fx.log.append(withdrawn)
+        #expect(try fx.log.events() == [granted, withdrawn])
+
+        // Each append takes the next sequence number.
+        let records = try fx.context.fetch(FetchDescriptor<ConsentEventRecord>(sortBy: [SortDescriptor(\.sequence)]))
+        #expect(records.map(\.sequence) == [1, 2])
+        #expect(records.map(\.kind) == ["granted", "withdrawn"])
+    }
+
+    @Test func sequenceDecidesTheOrderOfEqualTimestampsNotInsertionOrder() throws {
+        let fx = try Fixture()
+        // Twelve events with the same timestamp, inserted newest-sequence-first: SQLite gives no order for ties on its own.
+        for number in (1...12).reversed() {
+            fx.context.insert(ConsentEventRecord(kind: number.isMultiple(of: 2) ? "withdrawn" : "granted", adultConfirmed: true,
+                                                 healthDataConsented: !number.isMultiple(of: 2), analyticsOptIn: false,
+                                                 consentVersion: "v\(number)", localeIdentifier: "en_US", recordedAt: Self.t0,
+                                                 sequence: number))
+        }
+        try fx.context.save()
+        #expect(try fx.log.events().map(\.consentVersion) == (1...12).map { "v\($0)" })
+    }
+
+    @Test func sequenceContinuesFromTheHighestExistingValue() throws {
+        let fx = try Fixture()
+        fx.context.insert(ConsentEventRecord(kind: "granted", adultConfirmed: true, healthDataConsented: true, analyticsOptIn: false,
+                                             consentVersion: "v", localeIdentifier: "en_US", recordedAt: Self.t0, sequence: 41))
+        try fx.context.save()
+        try fx.log.append(Self.withdrawn(at: Self.t0))
+        let sequences = try fx.context.fetch(FetchDescriptor<ConsentEventRecord>(sortBy: [SortDescriptor(\.sequence)])).map(\.sequence)
+        #expect(sequences == [41, 42])
+    }
+
     @Test func everyFieldRoundTrips() throws {
         let fx = try Fixture()
         let event = ConsentEvent(kind: .granted, adultConfirmed: true, healthDataConsented: true, analyticsOptIn: false,
