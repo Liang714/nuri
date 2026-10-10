@@ -1,8 +1,10 @@
 import SwiftUI
+import NuriDomain
 
-public enum SourceKind: String, CaseIterable, Sendable {
-    case verified, manufacturer, community, userCreated, photoEstimate
+/// Existing name for the food-source enum, which now lives in NuriDomain.
+public typealias SourceKind = FoodSource
 
+extension FoodSource {
     public var symbolName: String {
         switch self {
         case .verified: "checkmark.shield"
@@ -25,11 +27,11 @@ public enum SourceKind: String, CaseIterable, Sendable {
 
 /// Where a food's numbers come from. Icon + text, never color alone.
 public struct SourceLabel: View {
-    private let kind: SourceKind
+    private let kind: FoodSource
     private let title: Text
     private let spoken: Text
 
-    public init(_ kind: SourceKind, title: Text, accessibilityLabel: Text) {
+    public init(_ kind: FoodSource, title: Text, accessibilityLabel: Text) {
         self.kind = kind
         self.title = title
         self.spoken = accessibilityLabel

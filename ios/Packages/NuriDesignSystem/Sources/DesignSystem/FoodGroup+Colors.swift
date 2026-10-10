@@ -1,7 +1,7 @@
-/// The six food groups that make up a person's world. Their colors are reserved for the world and its legend.
-public enum FoodGroup: String, CaseIterable, Codable, Sendable {
-    case vegetables, fruit, grains, protein, legumesAndNuts, dairyAndAlternatives
+// Callers that `import DesignSystem` keep seeing the domain enums (FoodGroup, FoodSource) without importing NuriDomain.
+@_exported import NuriDomain
 
+extension FoodGroup {
     public var fill: RGB {
         switch self {
         case .vegetables: RGB(hex: 0x4F8A5B)

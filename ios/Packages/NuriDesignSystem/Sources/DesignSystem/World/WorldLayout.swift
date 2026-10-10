@@ -1,4 +1,5 @@
 import CoreGraphics
+import NuriDomain
 
 /// Fixed places on the world, from the approved board (196 pt reference globe).
 public enum WorldLayout {

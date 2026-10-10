@@ -6,8 +6,16 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [.library(name: "DesignSystem", targets: ["DesignSystem"])],
+    dependencies: [.package(path: "../NuriEngines")],
     targets: [
-        .target(name: "DesignSystem", resources: [.process("Resources")]),
-        .testTarget(name: "DesignSystemTests", dependencies: ["DesignSystem"]),
+        .target(
+            name: "DesignSystem",
+            dependencies: [.product(name: "NuriDomain", package: "NuriEngines")],
+            resources: [.process("Resources")]
+        ),
+        .testTarget(
+            name: "DesignSystemTests",
+            dependencies: ["DesignSystem", .product(name: "NuriDomain", package: "NuriEngines")]
+        ),
     ]
 )

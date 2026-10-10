@@ -1,4 +1,5 @@
 import SwiftUI
+import NuriDomain
 
 /// Nuri's signature: each food group eaten today is a place on a small world.
 /// Groups from earlier in the week rest as outlines. Nothing shrinks; there is no count.

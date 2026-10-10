@@ -1,4 +1,5 @@
 import Testing
+import NuriDomain
 @testable import DesignSystem
 
 @Suite struct FoodGroupTests {
