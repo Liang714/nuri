@@ -34,7 +34,7 @@ python3 scripts/lint_copy.py ios/App/Localizable.xcstrings
 (cd scripts && python3 -m unittest test_lint_copy -v)
 ```
 
-`-parallel-testing-enabled NO` keeps Xcode from cloning simulators; the clones stalled in local runs. If you have no iPhone 17 simulator, swap in any installed iPhone name. CI (`.github/workflows/ios.yml`, `engines.yml`) runs the same commands and picks the newest available iPhone simulator by id.
+`-parallel-testing-enabled NO` keeps Xcode from cloning simulators; the clones stalled in local runs. If you have no iPhone 17 simulator, swap in any installed iPhone name. CI (`.github/workflows/ios.yml`, `engines.yml`) runs the same commands. The app job selects the newest installed Xcode and an iPhone simulator whose iOS version matches that Xcode's SDK (`scripts/pick_simulator.py`, newest older runtime as the fallback), and passes the simulator by id.
 
 ## Layout
 
@@ -67,7 +67,7 @@ ios/
 - **Native first.** System `TabView` and `NavigationStack`, inset-grouped `List`, sheets with Cancel, `Toggle`, SF Symbols. Lists use `.scrollContentBackground(.hidden)` with `nuriGround` behind and `nuriSurface` rows, so they follow the palette in both themes.
 - **Food-group colors are reserved.** `FoodGroup` fills and rings appear only in the world and its legend, never in buttons, charts or text.
 - **Hide numbers.** When on, no calories, grams, nutrients, minutes or ads appear anywhere. The setting lives in `AppState.hideNumbers`, and the app root publishes it as the `nuriHideNumbers` environment value. `AdCard` and `NuriProgressBar` read it and gate themselves (the card renders nothing; the bar drops its spoken value), so a screen cannot leak an ad or amount by forgetting; screens still check it before showing their own numbers. The setting is named for what it does, never for a condition. Today's daily-guide line is the only gated element so far, covered by a UI test; new screens that show numbers must gate them and add a test.
-- **Copy.** Every user-facing string lives in `ios/App/Localizable.xcstrings` with English and Korean values. Food actions say "Add", activity actions say "Log". Never moralize food or frame exercise as making up for eating. `scripts/lint_copy.py` scans the catalog for banned phrasing (English and Korean) and CI runs it. The design-system package keeps its own small catalog (`Sources/DesignSystem/Resources/Localizable.xcstrings`) for strings inside its components; the lint does not scan it by default, so pass its path when you edit it:
+- **Copy.** Every user-facing string lives in `ios/App/Localizable.xcstrings` with English and Korean values. Food actions say "Add", activity actions say "Log". Never moralize food or frame exercise as making up for eating. `scripts/lint_copy.py` scans the catalog for banned phrasing (English and Korean) and checks that every key has translated, non-empty `en` and `ko` values; CI runs it. The design-system package keeps its own small catalog (`Sources/DesignSystem/Resources/Localizable.xcstrings`) for strings inside its components; the lint does not scan it by default, so pass its path when you edit it (CI scans both):
   `python3 scripts/lint_copy.py ios/Packages/NuriDesignSystem/Sources/DesignSystem/Resources/Localizable.xcstrings`
 
 ## What is real and what is not yet

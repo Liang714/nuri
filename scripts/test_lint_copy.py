@@ -6,14 +6,20 @@ import unittest
 from lint_copy import scan
 
 
-def catalog(strings):
-    data = {"sourceLanguage": "en", "version": "1.0", "strings": {
-        key: {"localizations": {"ko": {"stringUnit": {"state": "translated", "value": ko}}}} for key, ko in strings.items()
-    }}
+def unit(value, state="translated"):
+    return {"stringUnit": {"state": state, "value": value}}
+
+
+def write_catalog(strings):
     f = tempfile.NamedTemporaryFile("w", suffix=".xcstrings", delete=False)
-    json.dump(data, f, ensure_ascii=False)
+    json.dump({"sourceLanguage": "en", "version": "1.0", "strings": strings}, f, ensure_ascii=False)
     f.close()
     return f.name
+
+
+def catalog(strings):
+    """Complete entries: English value equals the key (as in the app catalog), Korean from `strings`."""
+    return write_catalog({key: {"localizations": {"en": unit(key), "ko": unit(ko)}} for key, ko in strings.items()})
 
 
 class LintCopyTests(unittest.TestCase):
@@ -55,17 +61,62 @@ class LintCopyTests(unittest.TestCase):
         self.assertEqual(self.run_scan({"Add meals": "식사 추가"}), [])
 
     def test_key_equal_to_english_value_is_reported_once(self):
-        data = {"sourceLanguage": "en", "version": "1.0", "strings": {
-            "Cheat day": {"localizations": {
-                "en": {"stringUnit": {"state": "translated", "value": "Cheat day"}},
-                "ko": {"stringUnit": {"state": "translated", "value": "자유식"}},
-            }}
-        }}
-        f = tempfile.NamedTemporaryFile("w", suffix=".xcstrings", delete=False)
-        json.dump(data, f, ensure_ascii=False)
-        f.close()
-        self.paths = [f.name]
-        self.assertEqual(len(scan(f.name)), 1)
+        self.assertEqual(len(self.run_scan({"Cheat day": "자유식"})), 1)
+
+    def test_burn_with_an_amount_is_compensation_framing(self):
+        for phrase in ["Burn 200 kcal", "Burned 150 calories", "Burning 80 cal", "burns 300 Calories today"]:
+            with self.subTest(phrase=phrase):
+                self.assertEqual(len(self.run_scan({phrase: "중립"})), 1)
+
+    def test_burn_without_an_amount_is_not_flagged(self):
+        self.assertEqual(self.run_scan({"Burn rate": "소모율", "Burn 3 candles": "초 3개"}), [])
+
+    def test_before_and_after_variants(self):
+        for phrase in ["Before and after", "before/after photos", "Before & after", "Before / After"]:
+            with self.subTest(phrase=phrase):
+                self.assertEqual(len(self.run_scan({phrase: "중립"})), 1)
+
+    def test_works_off_device_is_not_work_off_compensation(self):
+        self.assertEqual(self.run_scan({"Works off-device": "기기 없이도 작동해요", "Offline mode": "오프라인"}), [])
+
+    def test_work_off_followed_by_punctuation_is_still_flagged(self):
+        for phrase in ["Work it off.", "Burn it off!", "Work off, then rest"]:
+            with self.subTest(phrase=phrase):
+                self.assertEqual(len(self.run_scan({phrase: "중립"})), 1)
+
+    # Completeness: every key needs translated, non-empty en and ko values.
+    def scan_entries(self, entries):
+        p = write_catalog(entries)
+        self.paths = [p]
+        return scan(p)
+
+    def test_complete_entry_passes(self):
+        self.assertEqual(self.scan_entries({"Hello": {"localizations": {"en": unit("Hello"), "ko": unit("안녕하세요")}}}), [])
+
+    def test_missing_korean_is_reported(self):
+        found = self.scan_entries({"Hello": {"localizations": {"en": unit("Hello")}}})
+        self.assertEqual(len(found), 1)
+        self.assertIn("ko", found[0][2])
+
+    def test_missing_english_is_reported(self):
+        found = self.scan_entries({"Hello": {"localizations": {"ko": unit("안녕하세요")}}})
+        self.assertEqual(len(found), 1)
+        self.assertIn("en", found[0][2])
+
+    def test_entry_without_localizations_is_reported_for_both_languages(self):
+        self.assertEqual(len(self.scan_entries({"Hello": {}})), 2)
+
+    def test_untranslated_state_is_reported(self):
+        for state in ["new", "needs_review", "stale"]:
+            with self.subTest(state=state):
+                found = self.scan_entries({"Hello": {"localizations": {"en": unit("Hello"), "ko": unit("안녕", state)}}})
+                self.assertEqual(len(found), 1)
+
+    def test_empty_or_blank_value_is_reported(self):
+        for value in ["", "   "]:
+            with self.subTest(value=value):
+                found = self.scan_entries({"Hello": {"localizations": {"en": unit("Hello"), "ko": unit(value)}}})
+                self.assertEqual(len(found), 1)
 
 
 if __name__ == "__main__":
