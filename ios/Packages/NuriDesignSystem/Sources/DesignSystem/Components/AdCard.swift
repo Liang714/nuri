@@ -36,11 +36,15 @@ public struct AdCard: View {
             HStack {
                 label.font(.nuriFootnoteEmphasis).foregroundStyle(Color.nuriAdLabel)
                 Spacer()
-                Button(action: onWhy) { Image(systemName: "info.circle") }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(Color.nuriInkSoft)
-                    .frame(width: NuriMetrics.minTouch, height: NuriMetrics.minTouch)
-                    .accessibilityLabel(Text("Why this ad, and hide options", bundle: .module))
+                // The 44 pt frame and its content shape sit inside the label, so the whole area is the button.
+                Button(action: onWhy) {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(Color.nuriInkSoft)
+                        .frame(width: NuriMetrics.minTouch, height: NuriMetrics.minTouch)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Why this ad, and hide options", bundle: .module))
             }
             title.font(.nuriHeadline).foregroundStyle(Color.nuriInk)
             subtitle.font(.nuriFootnote).foregroundStyle(Color.nuriInkSoft)

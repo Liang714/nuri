@@ -64,15 +64,16 @@ class LintCopyTests(unittest.TestCase):
         self.assertEqual(len(self.run_scan({"Cheat day": "자유식"})), 1)
 
     def test_burn_with_an_amount_is_compensation_framing(self):
-        for phrase in ["Burn 200 kcal", "Burned 150 calories", "Burning 80 cal", "burns 300 Calories today"]:
+        for phrase in ["Burn 200 kcal", "Burned 150 calories", "Burning 80 cal", "burns 300 Calories today",
+                       "Burn 1,200 calories", "Burnt 200 kcal", "burn 200 cals", "Burn 1.5 kcals"]:
             with self.subTest(phrase=phrase):
                 self.assertEqual(len(self.run_scan({phrase: "중립"})), 1)
 
     def test_burn_without_an_amount_is_not_flagged(self):
-        self.assertEqual(self.run_scan({"Burn rate": "소모율", "Burn 3 candles": "초 3개"}), [])
+        self.assertEqual(self.run_scan({"Burn rate": "소모율", "Burn 3 candles": "초 3개", "Burn 2 calendars": "달력 2개"}), [])
 
     def test_before_and_after_variants(self):
-        for phrase in ["Before and after", "before/after photos", "Before & after", "Before / After"]:
+        for phrase in ["Before and after", "before/after photos", "Before & after", "Before / After", "Before-and-after", "Before - and - after"]:
             with self.subTest(phrase=phrase):
                 self.assertEqual(len(self.run_scan({phrase: "중립"})), 1)
 
@@ -92,6 +93,21 @@ class LintCopyTests(unittest.TestCase):
 
     def test_complete_entry_passes(self):
         self.assertEqual(self.scan_entries({"Hello": {"localizations": {"en": unit("Hello"), "ko": unit("안녕하세요")}}}), [])
+
+    def test_should_translate_false_entry_is_not_flagged(self):
+        entries = {
+            "Nuri": {"shouldTranslate": False},
+            "© Nuri": {"shouldTranslate": False, "localizations": {"en": unit("© Nuri")}},
+        }
+        self.assertEqual(self.scan_entries(entries), [])
+
+    def test_should_translate_false_entry_still_gets_the_banned_copy_scan(self):
+        found = self.scan_entries({"Cheat day": {"shouldTranslate": False}})
+        self.assertEqual(len(found), 1)
+        self.assertNotIn("incomplete", found[0][2])
+
+    def test_should_translate_true_entry_is_still_checked(self):
+        self.assertEqual(len(self.scan_entries({"Hello": {"shouldTranslate": True}})), 2)
 
     def test_missing_korean_is_reported(self):
         found = self.scan_entries({"Hello": {"localizations": {"en": unit("Hello")}}})
@@ -117,6 +133,44 @@ class LintCopyTests(unittest.TestCase):
             with self.subTest(value=value):
                 found = self.scan_entries({"Hello": {"localizations": {"en": unit("Hello"), "ko": unit(value)}}})
                 self.assertEqual(len(found), 1)
+
+    # Variations (plural, device) can nest; an entry is translated when every leaf string unit is.
+    @staticmethod
+    def plural(**cases):
+        return {"variations": {"plural": {name: unit(value, state) for name, (value, state) in cases.items()}}}
+
+    def test_plural_variations_with_translated_leaves_pass(self):
+        entry = {"localizations": {"en": self.plural(one=("%lld item", "translated"), other=("%lld items", "translated")),
+                                   "ko": self.plural(other=("%lld개", "translated"))}}
+        self.assertEqual(self.scan_entries({"%lld items": entry}), [])
+
+    def test_nested_variations_with_translated_leaves_pass(self):
+        en = {"variations": {"device": {"iphone": self.plural(one=("%lld meal", "translated"), other=("%lld meals", "translated")),
+                                        "other": unit("%lld meals")}}}
+        ko = {"variations": {"device": {"iphone": self.plural(other=("식사 %lld개", "translated")),
+                                        "other": unit("식사 %lld개")}}}
+        self.assertEqual(self.scan_entries({"%lld meals": {"localizations": {"en": en, "ko": ko}}}), [])
+
+    def test_nested_variations_with_an_untranslated_leaf_are_reported(self):
+        en = {"variations": {"device": {"iphone": self.plural(other=("%lld meals", "translated"))}}}
+        ko = {"variations": {"device": {"iphone": self.plural(one=("식사 %lld개", "translated"), other=("식사 %lld개", "new"))}}}
+        found = self.scan_entries({"%lld meals": {"localizations": {"en": en, "ko": ko}}})
+        self.assertEqual(len(found), 1)
+        self.assertIn("ko", found[0][2])
+
+    def test_variation_case_without_any_text_is_reported(self):
+        en = {"variations": {"plural": {"one": {}, "other": unit("%lld items")}}}
+        ko = self.plural(other=("%lld개", "translated"))
+        found = self.scan_entries({"%lld items": {"localizations": {"en": en, "ko": ko}}})
+        self.assertEqual(len(found), 1)
+        self.assertIn("en", found[0][2])
+
+    def test_banned_copy_inside_nested_variations_is_found(self):
+        en = {"variations": {"device": {"iphone": self.plural(other=("Burn 200 kcal", "translated"))}}}
+        ko = {"variations": {"device": {"iphone": self.plural(other=("중립", "translated"))}}}
+        found = self.scan_entries({"Calories": {"localizations": {"en": en, "ko": ko}}})
+        self.assertEqual(len(found), 1)
+        self.assertNotIn("incomplete", found[0][2])
 
 
 if __name__ == "__main__":

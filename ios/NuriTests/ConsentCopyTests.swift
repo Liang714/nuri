@@ -8,15 +8,8 @@ import Testing
 @MainActor
 @Suite struct ConsentCopyTests {
     /// Every string on the consent screen that says what is stored, why, and what the person agrees to.
-    static let consentKeys = [
-        "I am 18 or older",
-        "Nuri is made for adults.",
-        "Store my food and activity data",
-        "Needed to run Nuri. This is health information, kept private and never sold or used to target ads. Export or delete it anytime.",
-        "Share anonymous usage stats",
-        "Helps improve Nuri. Never includes foods, notes or health data.",
-        "Nuri gives general wellness estimates, not medical advice. Food energy, nutrients and exercise vary by person, preparation and device. For medical or nutrition guidance, talk to a qualified clinician.",
-    ]
+    /// `ConsentCopy` is the single source, so a new consent string cannot be forgotten here.
+    static let consentKeys = ConsentCopy.all.map(\.key)
 
     private static let missing = "\u{0}missing"
 
@@ -26,7 +19,7 @@ import Testing
         let path = try #require(appBundle.path(forResource: language, ofType: "lproj"), "The app bundle has no \(language) localization")
         let table = try #require(Bundle(path: path))
         let value = table.localizedString(forKey: key, value: missing, table: nil)
-        try #require(value != missing, "Consent key \(key.debugDescription) is not in the \(language) strings; update ConsentCopyTests.consentKeys")
+        try #require(value != missing, "Consent key \(key.debugDescription) is not in the \(language) strings; add it to Localizable.xcstrings with English and Korean values, then bump AppState.consentVersion and consentCopyFingerprint")
         return value
     }
 
@@ -58,5 +51,18 @@ import Testing
             #expect(!english.isEmpty && !korean.isEmpty)
             #expect(english != korean, "\(key.debugDescription) has no Korean translation")
         }
+    }
+
+    /// `ConsentView` must draw every visible string from `ConsentCopy`; a quoted literal would escape the fingerprint.
+    @Test func consentViewUsesOnlyConsentCopy() throws {
+        // #filePath is .../ios/NuriTests/ConsentCopyTests.swift; the view is .../ios/App/Onboarding/ConsentView.swift.
+        let iosRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let view = iosRoot.appendingPathComponent("App/Onboarding/ConsentView.swift")
+        let source = try String(contentsOf: view, encoding: .utf8)
+        let literal = try Regex(#"\b(Text|Label|Button|Toggle|Section|NavigationLink|LabeledContent|Link|navigationTitle|accessibilityLabel|row)\(\s*(verbatim:\s*)?""#)
+        let offenders = source.split(separator: "\n", omittingEmptySubsequences: false).enumerated()
+            .filter { $0.element.contains(literal) }
+            .map { "line \($0.offset + 1): \($0.element.trimmingCharacters(in: .whitespaces))" }
+        #expect(offenders.isEmpty, "ConsentView.swift has quoted strings; move them into ConsentCopy: \(offenders)")
     }
 }

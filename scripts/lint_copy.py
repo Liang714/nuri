@@ -10,9 +10,9 @@ BANNED = [
     r"\bcheat(s|ed|ing)?\b", r"\bguilt(y|-free)?\b", r"\bearn(ed|s)?\b",
     # "off" must end the word: "works off-device" is not exercise as compensation
     r"\bburn(s|ed|ing|t)?\s+((it|them|that)\s+)?off(?![-\w])", r"\bwork(s|ed|ing)?\s+((it|that|dinner|lunch|breakfast)\s+)?off(?![-\w])",
-    r"\bburn(s|ed|ing)?\s+\d+\s*(k?cal|calories)\b",
+    r"\bburn(s|ed|ing|t)?\s+\d[\d,.]*\s*(k?cals?|calories)\b",
     r"\bskinny\b", r"\bdetox\b", r"\bcleanse\b", r"\b(good|bad|junk) foods?\b", r"\bsinful\b",
-    r"\bover budget\b", r"\byou failed\b", r"\bmust exercise\b", r"\bbefore\s*(and|/|&)\s*after\b",
+    r"\bover budget\b", r"\byou failed\b", r"\bmust exercise\b", r"\bbefore[\s-]*(and|/|&)[\s-]*after\b",
     # Food words use "Add", never "Log" (activity words use "Log")
     r"\blog\s+(your\s+)?(meals?|foods?)\b",
     # Korean, spacing-tolerant
@@ -23,30 +23,34 @@ BANNED = [
 PATTERNS = [re.compile(p, re.IGNORECASE) for p in BANNED]
 
 
-def _texts(entry):
-    for loc in entry.get("localizations", {}).values():
-        unit = loc.get("stringUnit")
-        if unit:
-            yield unit.get("value", "")
-        for variation in loc.get("variations", {}).values():
-            for case in variation.values():
-                yield case.get("stringUnit", {}).get("value", "")
-
-
 REQUIRED_LANGUAGES = ("en", "ko")
 
 
-def _units(localization):
-    """The string units of one language: its own, or one per plural/device variation case."""
-    if "stringUnit" in localization:
-        yield localization["stringUnit"]
-    for variation in localization.get("variations", {}).values():
-        for case in variation.values():
-            yield case.get("stringUnit", {})
+def _units(node, top=True):
+    """The leaf string units of one localization: its own stringUnit, or those at the leaves of its (possibly nested)
+    plural/device variations. A variation case with no text at all yields an empty unit, so it is reported."""
+    variations = node.get("variations")
+    if "stringUnit" in node:
+        yield node["stringUnit"]
+    if variations:
+        for variation in variations.values():
+            for case in variation.values():
+                yield from _units(case, top=False)
+    elif "stringUnit" not in node and not top:
+        yield {}
+
+
+def _texts(entry):
+    for localization in entry.get("localizations", {}).values():
+        for unit in _units(localization):
+            yield unit.get("value", "")
 
 
 def _completeness(key, entry):
-    """Findings for a key whose en or ko value is missing, not 'translated', or blank."""
+    """Findings for a key whose en or ko value is missing, not 'translated', or blank.
+    Entries marked "shouldTranslate": false (brand names, symbols) have nothing to translate and are skipped."""
+    if entry.get("shouldTranslate") is False:
+        return
     localizations = entry.get("localizations", {})
     for lang in REQUIRED_LANGUAGES:
         units = list(_units(localizations.get(lang, {})))

@@ -12,44 +12,43 @@ struct ConsentView: View {
     var body: some View {
         List {
             Section {
-                Toggle(isOn: $adult) { row("I am 18 or older", "Nuri is made for adults.") }
+                Toggle(isOn: $adult) { row(ConsentCopy.adultTitle, ConsentCopy.adultDetail) }
                     .accessibilityIdentifier("consent.adult")
                     .listRowBackground(Color.nuriSurface)
                 Toggle(isOn: $healthData) {
-                    row("Store my food and activity data",
-                        "Needed to run Nuri. This is health information, kept private and never sold or used to target ads. Export or delete it anytime.")
+                    row(ConsentCopy.healthTitle, ConsentCopy.healthDetail)
                 }
                 .accessibilityIdentifier("consent.healthData")
                 .listRowBackground(Color.nuriSurface)
-                NavigationLink { DataUseView() } label: { Text("What we store and why").font(.nuriBody).foregroundStyle(Color.nuriInk) }
+                NavigationLink { DataUseView() } label: { Text(ConsentCopy.dataUseLink).font(.nuriBody).foregroundStyle(Color.nuriInk) }
                     .listRowBackground(Color.nuriSurface)
-            } header: { NuriSectionHeader(Text("Required")) }
+            } header: { NuriSectionHeader(Text(ConsentCopy.requiredHeader)) }
 
             Section {
-                Toggle(isOn: $analytics) { row("Share anonymous usage stats", "Helps improve Nuri. Never includes foods, notes or health data.") }
+                Toggle(isOn: $analytics) { row(ConsentCopy.analyticsTitle, ConsentCopy.analyticsDetail) }
                     .accessibilityIdentifier("consent.analytics")
                     .listRowBackground(Color.nuriSurface)
-            } header: { NuriSectionHeader(Text("Optional")) }
+            } header: { NuriSectionHeader(Text(ConsentCopy.optionalHeader)) }
 
             Section {
-                Text("Nuri gives general wellness estimates, not medical advice. Food energy, nutrients and exercise vary by person, preparation and device. For medical or nutrition guidance, talk to a qualified clinician.")
+                Text(ConsentCopy.disclaimer)
                     .nuriSecondaryText()
                     .listRowBackground(Color.nuriSurface)
             }
         }
         .nuriGroupedList()
-        .navigationTitle(Text("Before you start"))
+        .navigationTitle(Text(ConsentCopy.screenTitle))
         .navigationBarTitleDisplayMode(.large)
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 8) {
                 Button {
                     try? appState.recordConsent(adult: adult, healthData: healthData, analytics: analytics)
-                } label: { Text("Continue") }
+                } label: { Text(ConsentCopy.continueButton) }
                 .buttonStyle(NuriPrimaryButtonStyle())
                 .disabled(!ready)
                 .accessibilityIdentifier("consent.continue")
                 if !ready {
-                    Text("Turn on the two required items to continue.")
+                    Text(ConsentCopy.requiredHint)
                         .nuriSecondaryText()
                 }
             }
@@ -59,7 +58,7 @@ struct ConsentView: View {
         }
     }
 
-    private func row(_ title: LocalizedStringKey, _ detail: LocalizedStringKey) -> some View {
+    private func row(_ title: LocalizedStringResource, _ detail: LocalizedStringResource) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(.nuriBodyEmphasis).foregroundStyle(Color.nuriInk)
             Text(detail).nuriSecondaryText()

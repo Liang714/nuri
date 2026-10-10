@@ -24,11 +24,15 @@ public struct NoticeCard: View {
                 }
                 .accessibilityElement(children: .combine)
                 if let actionTitle, let action {
-                    Button(action: action) { actionTitle }
-                        .buttonStyle(.plain)
-                        .font(.nuriFootnoteEmphasis)
-                        .foregroundStyle(Color.nuriLink)
-                        .frame(minWidth: NuriMetrics.minTouch, minHeight: NuriMetrics.minTouch, alignment: .leading)
+                    // The 44 pt frame and its content shape sit inside the label, so the whole area is the button.
+                    Button(action: action) {
+                        actionTitle
+                            .font(.nuriFootnoteEmphasis)
+                            .foregroundStyle(Color.nuriLink)
+                            .frame(minWidth: NuriMetrics.minTouch, minHeight: NuriMetrics.minTouch, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .foregroundStyle(Color.nuriNoticeInk)

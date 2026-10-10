@@ -34,7 +34,7 @@ python3 scripts/lint_copy.py ios/App/Localizable.xcstrings
 (cd scripts && python3 -m unittest test_lint_copy -v)
 ```
 
-`-parallel-testing-enabled NO` keeps Xcode from cloning simulators; the clones stalled in local runs. If you have no iPhone 17 simulator, swap in any installed iPhone name. CI (`.github/workflows/ios.yml`, `engines.yml`) runs the same commands. The app job selects the newest installed Xcode and an iPhone simulator whose iOS version matches that Xcode's SDK (`scripts/pick_simulator.py`, newest older runtime as the fallback), and passes the simulator by id.
+`-parallel-testing-enabled NO` keeps Xcode from cloning simulators; the clones stalled in local runs. If you have no iPhone 17 simulator, swap in any installed iPhone name. CI (`.github/workflows/ios.yml`, `engines.yml`) runs the same commands. The app job selects the newest installed non-beta Xcode and an iPhone simulator whose iOS version matches that Xcode's SDK (`scripts/pick_simulator.py`, newest older runtime as the fallback), and passes the simulator by id.
 
 ## Layout
 
@@ -44,6 +44,7 @@ ios/
   App/                  app target
     NuriApp.swift         entry point, launch-argument handling
     AppState.swift        onboarding stage, consent record, Hide numbers (UserDefaults)
+    ConsentCopy.swift     the consent-screen strings, pinned by ConsentCopyTests
     AuthService.swift     sign-in seam; UnavailableAuthService is the only implementation
     EmailValidator.swift
     Onboarding/           Welcome, email sign-in placeholder, Consent, DataUse
@@ -60,14 +61,14 @@ ios/
 
 ## Design-system rules
 
-- **Tokens only.** Colors come from `NuriPalette` through the `Color.nuri*` accessors (each is a light and dark pair), text from the `Font.nuri*` styles, sizes from `NuriMetrics`. Text styles are Dynamic Type styles in SF Pro Rounded; the only fixed point size allowed is the 누리 logotype.
+- **Tokens only.** Colors come from `NuriPalette` through the `Color.nuri*` accessors (each is a light and dark pair), text from the `Font.nuri*` styles, sizes from `NuriMetrics`. Text styles are Dynamic Type styles in SF Pro Rounded; the only size not taken from a text style is the 누리 logotype, which is 40 pt at the default setting and scales with Dynamic Type through `@ScaledMetric`.
 - **One documented exception.** The Apple and Google sign-in buttons follow the providers' brand colors (`BrandButtonColors` in `Onboarding/WelcomeView.swift`), light and dark.
 - **Contrast is tested.** `PaletteTests` fails if any listed text pair drops below 4.5:1 or any non-text pair below 3:1, in both themes. Add a new token pair to those lists when you add a token.
 - **Touch targets.** At least 44 pt everywhere (`NuriMetrics.minTouch`); primary buttons are 52 pt (`NuriMetrics.buttonHeight`).
 - **Native first.** System `TabView` and `NavigationStack`, inset-grouped `List`, sheets with Cancel, `Toggle`, SF Symbols. Lists use `.scrollContentBackground(.hidden)` with `nuriGround` behind and `nuriSurface` rows, so they follow the palette in both themes.
 - **Food-group colors are reserved.** `FoodGroup` fills and rings appear only in the world and its legend, never in buttons, charts or text.
 - **Hide numbers.** When on, no calories, grams, nutrients, minutes or ads appear anywhere. The setting lives in `AppState.hideNumbers`, and the app root publishes it as the `nuriHideNumbers` environment value. `AdCard` and `NuriProgressBar` read it and gate themselves (the card renders nothing; the bar drops its spoken value), so a screen cannot leak an ad or amount by forgetting; screens still check it before showing their own numbers. The setting is named for what it does, never for a condition. Today's daily-guide line is the only gated element so far, covered by a UI test; new screens that show numbers must gate them and add a test.
-- **Consent copy is versioned.** `AppState.consentVersion` is stored with each consent record. `ConsentCopyTests` hashes the English and Korean consent-screen strings and compares them with `AppState.consentCopyFingerprint`; if you edit that copy the test fails and tells you to bump `consentVersion` (so people consent again) and update the fingerprint.
+- **Consent copy is versioned, with one source.** `ConsentCopy` (`App/ConsentCopy.swift`) holds every consent-screen string as a `LocalizedStringResource`, and `ConsentView` renders only those constants; `ConsentCopyTests` fails if `ConsentView.swift` contains a quoted string literal. `ConsentCopy.all` lists the strings that say what is stored and agreed to. `AppState.consentVersion` is stored with each consent record, and `ConsentCopyTests` hashes the English and Korean text of everything in `ConsentCopy.all` and compares it with `AppState.consentCopyFingerprint`. Change any of those strings, in Swift or in the catalog, and the fingerprint test fails and tells you to bump `consentVersion` (so people consent again) and update the fingerprint. A new consent string goes in `ConsentCopy` and in `all`, which is what pins it. The screen's titles, section headers and button are `ConsentCopy` constants too, but they are not in `all`.
 - **Copy.** Every user-facing string lives in `ios/App/Localizable.xcstrings` with English and Korean values. Food actions say "Add", activity actions say "Log". Never moralize food or frame exercise as making up for eating. `scripts/lint_copy.py` scans the catalog for banned phrasing (English and Korean) and checks that every key has translated, non-empty `en` and `ko` values; CI runs it. The design-system package keeps its own small catalog (`Sources/DesignSystem/Resources/Localizable.xcstrings`) for strings inside its components; the lint does not scan it by default, so pass its path when you edit it (CI scans both):
   `python3 scripts/lint_copy.py ios/Packages/NuriDesignSystem/Sources/DesignSystem/Resources/Localizable.xcstrings`
 

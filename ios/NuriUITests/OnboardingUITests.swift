@@ -62,6 +62,23 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertEqual(scan.frame.height, addFood.frame.height, accuracy: 0.5, "The barcode button matches Add food")
     }
 
+    @MainActor
+    func testEmailNoticeActionIsATappable44PointTarget() {
+        let app = launchFresh()
+        app.buttons["Continue with email"].tap()
+        let field = app.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("you@example.com\n")
+        app.buttons["Send code"].tap()
+
+        // The notice's action is a plain button; its 44 pt area must be the button itself, not padding around it.
+        let action = app.buttons["Use without an account"]
+        XCTAssertTrue(action.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(action.frame.height, 44, "action height \(action.frame.height)")
+        XCTAssertGreaterThanOrEqual(action.frame.width, 44, "action width \(action.frame.width)")
+    }
+
     // MARK: - Accessibility audits (contrast, element descriptions, hit regions, text clipping, Dynamic Type)
 
     @MainActor
@@ -114,7 +131,7 @@ final class OnboardingUITests: XCTestCase {
     }
 
     /// Runs the system accessibility audit on the current screen. Every issue it raises is logged as a test activity;
-    /// the two known false positives below are the only ones filtered.
+    /// the known false positives below are the only ones filtered.
     @MainActor
     private func audit(_ app: XCUIApplication) throws {
         // Keep going after the first issue so one run lists every issue on the screen.
@@ -128,6 +145,12 @@ final class OnboardingUITests: XCTestCase {
             // ("What we store and why") and for the "About" section header. Both use Dynamic Type text styles and were
             // checked at the largest accessibility size, where they scale and wrap like every other row.
             if issue.auditType == .dynamicType, ["What we store and why", "About"].contains(label) {
+                XCTContext.runActivity(named: "Accessibility audit issue ignored: \(summary)") { _ in }
+                return true
+            }
+            // False positive on iPhone 18 Pro Max (iOS 27.0): measured #4A5750 on #FAFCF9 = 7.35:1; passes on iPhone 17/17e/Air/18 Pro.
+            // Only the contrast issue on the Before-you-start hint (exact label) is ignored; any other issue on it still fails.
+            if issue.auditType == .contrast, label == "Turn on the two required items to continue." {
                 XCTContext.runActivity(named: "Accessibility audit issue ignored: \(summary)") { _ in }
                 return true
             }

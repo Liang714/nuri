@@ -18,10 +18,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Select the newest Xcode
+      - name: Select the newest non-beta Xcode
         run: |
-          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
-          test -n "$XCODE" || { echo "No Xcode found in /Applications"; exit 1; }
+          XCODE=$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -1)
+          test -n "$XCODE" || { echo "No non-beta Xcode found in /Applications"; exit 1; }
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
           xcrun --sdk iphonesimulator --show-sdk-version
