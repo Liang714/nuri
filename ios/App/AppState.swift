@@ -22,6 +22,9 @@ struct ConsentRecord: Codable, Equatable, Sendable {
 @Observable
 final class AppState {
     static let consentVersion = "2026-10-08"
+    /// SHA-256 of the English and Korean consent copy that `consentVersion` covers (see `ConsentCopyTests`).
+    /// When that test fails, the consent text changed: bump `consentVersion` so people consent again, then paste the new value here.
+    static let consentCopyFingerprint = "52e6976413803f27ba3d126ac71792fc4b34d88b154b07d51b1389f245525c9e"
 
     private enum Keys {
         static let stage = "onboarding.stage"
