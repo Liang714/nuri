@@ -36,6 +36,23 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.alerts["Account sign-in arrives in a later build"].waitForExistence(timeout: 5))
     }
 
+    @MainActor
+    func testHideNumbersRemovesTheDailyGuideLine() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTestFreshState"]
+        app.launch()
+        app.buttons["Use without an account"].tap()
+        flip(app.switches["consent.adult"])
+        flip(app.switches["consent.healthData"])
+        app.buttons["consent.continue"].tap()
+
+        XCTAssertTrue(app.staticTexts["today.guide"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["You"].tap()
+        flip(app.switches["you.hideNumbers"])
+        app.tabBars.buttons["My Nuri"].tap()
+        XCTAssertFalse(app.staticTexts["today.guide"].exists)
+    }
+
     private func flip(_ toggle: XCUIElement) {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
