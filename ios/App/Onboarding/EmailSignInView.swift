@@ -13,8 +13,8 @@ struct EmailSignInView: View {
                     .font(.nuriBody)
                     .foregroundStyle(Color.nuriInkSoft)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Email").font(.nuriSubheadlineEmphasis)
-                    TextField("you@example.com", text: $email)
+                    Text("Email").font(.nuriSubheadlineEmphasis).accessibilityHidden(true)
+                    TextField(text: $email, prompt: Text("you@example.com")) { Text("Email") }
                         .keyboardType(.emailAddress)
                         .textContentType(.emailAddress)
                         .textInputAutocapitalization(.never)
@@ -22,6 +22,10 @@ struct EmailSignInView: View {
                         .padding(.horizontal, 14)
                         .frame(minHeight: NuriMetrics.buttonHeight)
                         .background(Color.nuriSurface, in: RoundedRectangle(cornerRadius: NuriMetrics.radiusControl, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: NuriMetrics.radiusControl, style: .continuous)
+                                .strokeBorder(Color.nuriAdOutline, lineWidth: 1)
+                        }
                 }
                 Button { showLater = true } label: { Text("Send code") }
                     .buttonStyle(NuriPrimaryButtonStyle())

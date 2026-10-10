@@ -50,4 +50,5 @@ public extension Color {
     static let nuriDisabledFill = Color(NuriPalette.disabledFill)
     static let nuriDisabledText = Color(NuriPalette.disabledText)
     static let nuriChevron = Color(NuriPalette.chevron)
+    static let nuriDestructive = Color(NuriPalette.destructive)
 }

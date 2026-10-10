@@ -8,46 +8,58 @@ struct WelcomeView: View {
     @State private var showAccountsLater = false
 
     var body: some View {
-        VStack(spacing: 0) {
+        GeometryReader { proxy in
             ScrollView {
-                VStack(spacing: 18) {
-                    WorldView(today: [.vegetables, .grains, .protein, .fruit], resting: [.legumesAndNuts],
-                              accessibilityLabel: Text("An illustrated world of food groups"))
-                        .frame(width: 196, height: 196)
-                        .padding(.top, 40)
-                    HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(verbatim: "누리").font(.system(size: 40)).foregroundStyle(Color.nuriTint)
-                        Text(verbatim: "Nuri").font(.nuriTitle2).foregroundStyle(Color.nuriTint)
+                VStack(spacing: 0) {
+                    VStack(spacing: 18) {
+                        WorldView(today: [.vegetables, .grains, .protein, .fruit], resting: [.legumesAndNuts],
+                                  accessibilityLabel: Text("An illustrated world of food groups"))
+                            .frame(width: 196, height: 196)
+                            .padding(.top, 40)
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text(verbatim: "누리").font(.system(size: 40)).foregroundStyle(Color.nuriTint)
+                            Text(verbatim: "Nuri").font(.nuriTitle2).foregroundStyle(Color.nuriTint)
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(Text(verbatim: "Nuri"))
+                        .accessibilityAddTraits(.isHeader)
+                        Text("Food and movement, gently")
+                            .font(.nuriTitle)
+                            .multilineTextAlignment(.center)
+                        Text("Add meals, watch your world grow, and get a plan that fits your week. Your data stays yours.")
+                            .font(.nuriBody)
+                            .foregroundStyle(Color.nuriInkSoft)
+                            .multilineTextAlignment(.center)
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text(verbatim: "Nuri"))
-                    .accessibilityAddTraits(.isHeader)
-                    Text("Food and movement, gently")
-                        .font(.nuriTitle)
-                        .multilineTextAlignment(.center)
-                    Text("Add meals, watch your world grow, and get a plan that fits your week. Your data stays yours.")
-                        .font(.nuriBody)
-                        .foregroundStyle(Color.nuriInkSoft)
-                        .multilineTextAlignment(.center)
+                    // The choices sit below the copy and scroll with it, so nothing clips at accessibility text sizes.
+                    // At default sizes the spacer keeps them near the bottom edge.
+                    Spacer(minLength: 24)
+                    VStack(spacing: 10) {
+                        Button { request(.apple) } label: { Label("Continue with Apple", systemImage: "apple.logo") }
+                            .buttonStyle(SolidButtonStyle(fill: BrandButtonColors.appleFill, text: BrandButtonColors.appleText))
+                        Button { request(.google) } label: { Text("Continue with Google") }
+                            .buttonStyle(SolidButtonStyle(fill: BrandButtonColors.googleFill, text: BrandButtonColors.googleText,
+                                                          outline: BrandButtonColors.googleOutline))
+                        Button(action: onEmail) { Label("Continue with email", systemImage: "envelope") }
+                            .buttonStyle(SolidButtonStyle(fill: .nuriFillSecondary, text: .nuriInk))
+                        Button(action: onWithoutAccount) {
+                            Text("Use without an account")
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .buttonStyle(NuriTextButtonStyle())
+                        Text("For adults 18 and over.")
+                            .font(.nuriFootnote)
+                            .foregroundStyle(Color.nuriInkSoft)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.bottom, 8)
                 }
                 .padding(.horizontal, 24)
+                .frame(minHeight: proxy.size.height)
             }
-            VStack(spacing: 10) {
-                Button { request(.apple) } label: { Label("Continue with Apple", systemImage: "apple.logo") }
-                    .buttonStyle(SolidButtonStyle(fill: .black, text: .white))
-                Button { request(.google) } label: { Text("Continue with Google") }
-                    .buttonStyle(SolidButtonStyle(fill: .white, text: Color(red: 0.12, green: 0.12, blue: 0.12), outline: Color(red: 0.455, green: 0.467, blue: 0.459)))
-                Button(action: onEmail) { Label("Continue with email", systemImage: "envelope") }
-                    .buttonStyle(SolidButtonStyle(fill: .nuriFillSecondary, text: .nuriInk))
-                Button(action: onWithoutAccount) { Text("Use without an account") }
-                    .buttonStyle(NuriTextButtonStyle())
-                Text("For adults 18 and over.")
-                    .font(.nuriFootnote)
-                    .foregroundStyle(Color.nuriInkSoft)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 8)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .background(Color.nuriGround.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
@@ -67,7 +79,17 @@ struct WelcomeView: View {
     }
 }
 
-/// Full-width 52 pt buttons for the sign-in choices (Apple black, Google white with outline).
+/// Apple and Google brand-button colors; documented exception to NuriPalette per their brand guidelines.
+/// Each pair follows the provider's light and dark button themes, so the Apple button never sinks into the dark ground.
+private enum BrandButtonColors {
+    static let appleFill = Color(ThemedColor(light: 0x000000, dark: 0xFFFFFF))
+    static let appleText = Color(ThemedColor(light: 0xFFFFFF, dark: 0x000000))
+    static let googleFill = Color(ThemedColor(light: 0xFFFFFF, dark: 0x131314))
+    static let googleText = Color(ThemedColor(light: 0x1F1F1F, dark: 0xE3E3E3))
+    static let googleOutline = Color(ThemedColor(light: 0x747775, dark: 0x8E918F))
+}
+
+/// Full-width buttons for the sign-in choices, at least 52 pt tall; labels wrap and the row grows with Dynamic Type.
 private struct SolidButtonStyle: ButtonStyle {
     let fill: Color
     let text: Color
@@ -77,6 +99,10 @@ private struct SolidButtonStyle: ButtonStyle {
         configuration.label
             .font(.nuriHeadline)
             .foregroundStyle(text)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
             .frame(maxWidth: .infinity, minHeight: NuriMetrics.buttonHeight)
             .background(fill.opacity(configuration.isPressed ? 0.85 : 1),
                         in: RoundedRectangle(cornerRadius: NuriMetrics.radiusButton, style: .continuous))
@@ -85,5 +111,6 @@ private struct SolidButtonStyle: ButtonStyle {
                     RoundedRectangle(cornerRadius: NuriMetrics.radiusButton, style: .continuous).strokeBorder(outline, lineWidth: 1)
                 }
             }
+            .contentShape(RoundedRectangle(cornerRadius: NuriMetrics.radiusButton, style: .continuous))
     }
 }

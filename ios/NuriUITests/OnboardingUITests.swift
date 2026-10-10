@@ -48,11 +48,15 @@ final class OnboardingUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["today.guide"].waitForExistence(timeout: 5))
         app.tabBars.buttons["You"].tap()
-        flip(app.switches["you.hideNumbers"])
+        let hideNumbers = app.switches["you.hideNumbers"]
+        flip(hideNumbers)
+        XCTAssertEqual(hideNumbers.value as? String, "1", "Hide numbers must be on before leaving You")
         app.tabBars.buttons["My Nuri"].tap()
+        XCTAssertTrue(app.buttons["Add food"].waitForExistence(timeout: 5), "My Nuri must be on screen before checking the guide")
         XCTAssertFalse(app.staticTexts["today.guide"].exists)
     }
 
+    @MainActor
     private func flip(_ toggle: XCUIElement) {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         toggle.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()

@@ -26,4 +26,5 @@ public enum NuriPalette {
     public static let disabledFill = ThemedColor(light: 0xD3D9D2, dark: 0x2A332D)
     public static let disabledText = ThemedColor(light: 0x4A5750, dark: 0x98A39B)
     public static let chevron = ThemedColor(light: 0x7F8882, dark: 0x8C978F)
+    public static let destructive = ThemedColor(light: 0xB3261E, dark: 0xFF8A80)
 }

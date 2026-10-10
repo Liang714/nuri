@@ -10,6 +10,8 @@ struct DataUseView: View {
             item("Never", "Selling your data, using it to target ads, or sharing it without your permission.", symbol: "hand.raised")
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.nuriGround.ignoresSafeArea())
         .navigationTitle(Text("What we store and why"))
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -23,5 +25,6 @@ struct DataUseView: View {
         } icon: {
             Image(systemName: symbol).foregroundStyle(Color.nuriTint)
         }
+        .listRowBackground(Color.nuriSurface)
     }
 }

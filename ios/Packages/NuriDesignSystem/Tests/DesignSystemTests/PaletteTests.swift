@@ -16,6 +16,7 @@ import Testing
         (P.community, P.surface, "community/surface"), (P.adLabel, P.surface, "adLabel/surface"),
         (P.noticeInk, P.notice, "noticeInk/notice"), (P.onToast, P.toast, "onToast/toast"),
         (P.toastAction, P.toast, "toastAction/toast"), (P.disabledText, P.disabledFill, "disabledText/disabledFill"),
+        (P.destructive, P.surface, "destructive/surface"),
     ]
 
     // non-text UI parts must reach 3:1

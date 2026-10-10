@@ -14,26 +14,33 @@ struct ConsentView: View {
             Section {
                 Toggle(isOn: $adult) { row("I am 18 or older", "Nuri is made for adults.") }
                     .accessibilityIdentifier("consent.adult")
+                    .listRowBackground(Color.nuriSurface)
                 Toggle(isOn: $healthData) {
                     row("Store my food and activity data",
                         "Needed to run Nuri. This is health information, kept private and never sold or used to target ads. Export or delete it anytime.")
                 }
                 .accessibilityIdentifier("consent.healthData")
+                .listRowBackground(Color.nuriSurface)
                 NavigationLink { DataUseView() } label: { Text("What we store and why") }
+                    .listRowBackground(Color.nuriSurface)
             } header: { Text("Required") }
 
             Section {
                 Toggle(isOn: $analytics) { row("Share anonymous usage stats", "Helps improve Nuri. Never includes foods, notes or health data.") }
                     .accessibilityIdentifier("consent.analytics")
+                    .listRowBackground(Color.nuriSurface)
             } header: { Text("Optional") }
 
             Section {
                 Text("Nuri gives general wellness estimates, not medical advice. Food energy, nutrients and exercise vary by person, preparation and device. For medical or nutrition guidance, talk to a qualified clinician.")
                     .font(.nuriFootnote)
                     .foregroundStyle(Color.nuriInkSoft)
+                    .listRowBackground(Color.nuriSurface)
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.nuriGround.ignoresSafeArea())
         .navigationTitle(Text("Before you start"))
         .navigationBarTitleDisplayMode(.large)
         .safeAreaInset(edge: .bottom) {

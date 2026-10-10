@@ -13,23 +13,23 @@ struct OnboardingFlow: View {
             WelcomeView(
                 auth: UnavailableAuthService(),
                 onEmail: { path.append(.email) },
-                onWithoutAccount: {
-                    appState.chooseGuest()
-                    path.append(.consent)
-                }
+                onWithoutAccount: showConsent
             )
             .navigationDestination(for: OnboardingRoute.self) { route in
                 switch route {
                 case .email:
-                    EmailSignInView(onWithoutAccount: {
-                        appState.chooseGuest()
-                        path.append(.consent)
-                    })
+                    EmailSignInView(onWithoutAccount: showConsent)
                 case .consent:
                     ConsentView()
                 }
             }
         }
         .onAppear { if appState.stage == .consent && path.isEmpty { path = [.consent] } }
+    }
+
+    /// Moves to consent from Welcome or email sign-in, never stacking a second consent screen.
+    private func showConsent() {
+        appState.chooseGuest()
+        if path.last != .consent { path.append(.consent) }
     }
 }
