@@ -14,8 +14,10 @@ public enum BodyUnits {
 
     public static func cm(feet: Int, inches: Int) -> Double { Double(feet * 12 + inches) * centimetersPerInch }
 
+    /// Whole feet and inches, rounded to the nearest inch. A value that is not a height (NaN, infinite, zero, negative
+    /// or too large to count in inches) gives (0, 0) instead of trapping.
     public static func feetAndInches(cm: Double) -> (feet: Int, inches: Int) {
-        let totalInches = Int((cm / centimetersPerInch).rounded())
+        guard cm.isFinite, cm > 0, let totalInches = Int(exactly: (cm / centimetersPerInch).rounded()) else { return (0, 0) }
         return (totalInches / 12, totalInches % 12)
     }
 
