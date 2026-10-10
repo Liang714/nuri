@@ -119,4 +119,21 @@ import Testing
         let other = SwiftDataConsentLog(context: ModelContext(fx.container))
         #expect(try other.events() == [Self.granted()])
     }
+
+    /// A real save failure cannot be forced on an in-memory store, so the log's save step is a seam (`save:`) and this test
+    /// makes it throw. What it pins is what the log does about the failure: nothing may stay pending in the context.
+    @Test func aFailedSaveLeavesNoStrandedRecordBehind() throws {
+        struct SaveFailure: Error {}
+        let fx = try Fixture()
+        let failing = SwiftDataConsentLog(context: fx.context, save: { _ in throw SaveFailure() })
+        #expect(throws: SaveFailure.self) { try failing.append(Self.granted()) }
+
+        // The failed grant is gone from the context, so the next successful save cannot write it by accident.
+        #expect(try fx.log.events().isEmpty)
+        #expect(!fx.context.hasChanges)
+        try fx.log.append(Self.withdrawn(at: Self.t0.addingTimeInterval(60)))
+        #expect(try fx.log.events().map(\.kind) == [.withdrawn])
+        let records = try fx.context.fetch(FetchDescriptor<ConsentEventRecord>())
+        #expect(records.map(\.sequence) == [1], "The failed append must not have used up a sequence number")
+    }
 }

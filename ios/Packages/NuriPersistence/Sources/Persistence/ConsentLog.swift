@@ -38,9 +38,17 @@ public protocol ConsentLogging {
 @MainActor
 public final class SwiftDataConsentLog: ConsentLogging {
     private let context: ModelContext
+    private let save: @MainActor (ModelContext) throws -> Void
 
     public init(context: ModelContext) {
         self.context = context
+        self.save = { try $0.save() }
+    }
+
+    /// Tests pass a `save` that fails, since a real save failure cannot be forced on an in-memory store.
+    init(context: ModelContext, save: @escaping @MainActor (ModelContext) throws -> Void) {
+        self.context = context
+        self.save = save
     }
 
     public func append(_ event: ConsentEvent) throws {
@@ -57,7 +65,14 @@ public final class SwiftDataConsentLog: ConsentLogging {
             recordedAt: event.recordedAt,
             sequence: next
         ))
-        try context.save()
+        do {
+            try save(context)
+        } catch {
+            // The insert is still pending in the context. Drop it, or the next successful save would write a record
+            // for a consent that was never recorded.
+            context.rollback()
+            throw error
+        }
     }
 
     public func events() throws -> [ConsentEvent] {
