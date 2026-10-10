@@ -1,7 +1,8 @@
 import Foundation
 
-/// The single source for consent-screen wording. ConsentView renders only these, and ConsentCopyTests pins them to
-/// AppState.consentVersion, so editing any of them (in Swift or in the catalog) forces a consent-version bump.
+/// The single source for consent-screen wording. ConsentView shows only these constants (ConsentCopyTests fails on any
+/// other string literal in that file). Only `all` is pinned to AppState.consentVersion, so editing one of those strings
+/// (in Swift or in the catalog) forces a consent-version bump. `chrome` is localized the same way but not pinned.
 enum ConsentCopy {
     static let adultTitle: LocalizedStringResource = "I am 18 or older"
     static let adultDetail: LocalizedStringResource = "Nuri is made for adults."
@@ -15,7 +16,7 @@ enum ConsentCopy {
     static let all: [LocalizedStringResource] = [adultTitle, adultDetail, healthTitle, healthDetail, analyticsTitle, analyticsDetail, disclaimer]
 
     // Screen chrome: titles, section headers, the link into the data-use notice, the button and its hint.
-    // They name controls and say nothing about what is stored or agreed to, so they are not in `all`
+    // They name controls and say nothing about what is stored or agreed to, so they are localized but not in `all`,
     // and editing them does not change the consent a person gave.
     static let screenTitle: LocalizedStringResource = "Before you start"
     static let requiredHeader: LocalizedStringResource = "Required"
@@ -23,4 +24,7 @@ enum ConsentCopy {
     static let dataUseLink: LocalizedStringResource = "What we store and why"
     static let continueButton: LocalizedStringResource = "Continue"
     static let requiredHint: LocalizedStringResource = "Turn on the two required items to continue."
+
+    /// Not pinned to the consent version: titles, section headers, the link and the button on the consent screen.
+    static let chrome: [LocalizedStringResource] = [screenTitle, requiredHeader, optionalHeader, dataUseLink, continueButton, requiredHint]
 }
