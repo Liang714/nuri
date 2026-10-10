@@ -28,7 +28,7 @@ public struct NoticeCard: View {
                         .buttonStyle(.plain)
                         .font(.nuriFootnoteEmphasis)
                         .foregroundStyle(Color.nuriLink)
-                        .frame(minHeight: NuriMetrics.minTouch, alignment: .leading)
+                        .frame(minWidth: NuriMetrics.minTouch, minHeight: NuriMetrics.minTouch, alignment: .leading)
                 }
             }
             .foregroundStyle(Color.nuriNoticeInk)

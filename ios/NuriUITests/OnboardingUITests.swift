@@ -50,6 +50,18 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["today.guide"].exists)
     }
 
+    @MainActor
+    func testMyNuriActionButtonsAreAtLeast52PointsTallAndMatch() {
+        let app = launchFresh()
+        completeOnboarding(app)
+        let addFood = app.buttons["Add food"]
+        let scan = app.buttons["Scan a barcode"]
+        XCTAssertTrue(addFood.waitForExistence(timeout: 5))
+        XCTAssertTrue(scan.exists)
+        XCTAssertGreaterThanOrEqual(addFood.frame.height, 52)
+        XCTAssertEqual(scan.frame.height, addFood.frame.height, accuracy: 0.5, "The barcode button matches Add food")
+    }
+
     // MARK: - Accessibility audits (contrast, element descriptions, hit regions, text clipping, Dynamic Type)
 
     @MainActor

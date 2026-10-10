@@ -23,10 +23,12 @@ struct TodayView: View {
                     HStack(spacing: 10) {
                         Button { addingFood = true } label: { Label("Add food", systemImage: "plus") }
                             .buttonStyle(NuriPrimaryButtonStyle())
-                        Button { addingFood = true } label: { Image(systemName: "barcode.viewfinder") }
-                            .buttonStyle(NuriSecondaryButtonStyle())
-                            .frame(width: NuriMetrics.buttonHeight)
-                            .accessibilityLabel(Text("Scan a barcode"))
+                        Button { addingFood = true } label: {
+                            // An icon in a fixed 52 pt tile: the glyph stops growing at xxxLarge so the tile never overflows.
+                            Image(systemName: "barcode.viewfinder").dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        }
+                        .buttonStyle(NuriSecondaryButtonStyle(minWidth: NuriMetrics.buttonHeight, minHeight: NuriMetrics.buttonHeight))
+                        .accessibilityLabel(Text("Scan a barcode"))
                     }
                     NuriCard {
                         VStack(alignment: .leading, spacing: 4) {
