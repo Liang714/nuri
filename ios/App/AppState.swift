@@ -1,12 +1,15 @@
 import Foundation
 import Observation
+import Persistence
 
 enum OnboardingStage: String, Sendable {
-    case welcome, consent, complete
+    case welcome, consent, profile, complete
 }
 
 enum ConsentError: Error, Equatable, Sendable {
     case adultRequired, healthDataRequired
+    /// The consent history could not be written, so consent is not granted: the proof must exist before the data does.
+    case couldNotRecord
 }
 
 /// What the person agreed to, when, and under which consent text version (PIPA record keeping).
@@ -33,16 +36,20 @@ final class AppState {
     }
 
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let consentLog: (any ConsentLogging)?
     private(set) var stage: OnboardingStage
     private(set) var consent: ConsentRecord?
     private(set) var hideNumbers: Bool
 
-    init(defaults: UserDefaults = .standard) {
+    /// `profileExists` is asked once, at launch, to decide whether a stored `.complete` can be trusted.
+    init(defaults: UserDefaults = .standard, consentLog: (any ConsentLogging)? = nil,
+         profileExists: @MainActor () -> Bool = { false }) {
         self.defaults = defaults
+        self.consentLog = consentLog
         let consent = defaults.data(forKey: Keys.consent).flatMap { try? Self.decoder.decode(ConsentRecord.self, from: $0) }
         let stored = defaults.string(forKey: Keys.stage).flatMap(OnboardingStage.init(rawValue:)) ?? .welcome
         self.consent = consent
-        self.stage = Self.resolvedStage(stored: stored, consent: consent)
+        self.stage = Self.resolvedStage(stored: stored, consent: consent, profileExists: profileExists)
         self.hideNumbers = defaults.bool(forKey: Keys.hideNumbers)
     }
 
@@ -57,9 +64,24 @@ final class AppState {
         guard healthData else { throw .healthDataRequired }
         let record = ConsentRecord(adultConfirmed: true, healthDataConsented: true, analyticsOptIn: analytics,
                                    consentVersion: Self.consentVersion, recordedAt: now)
+        // The history comes first: if it cannot be written, nothing else changes and the person stays on consent.
+        do { try consentLog?.append(Self.event(.granted, from: record, at: now)) } catch { throw .couldNotRecord }
         if let data = try? Self.encoder.encode(record) { defaults.set(data, forKey: Keys.consent) }
         consent = record
+        setStage(.profile)
+    }
+
+    /// The profile is saved by the profile flow before this is called; only that stage leads to `.complete`.
+    func completeProfile() {
+        guard stage == .profile else { return }
         setStage(.complete)
+    }
+
+    /// Records that consent was withdrawn, carrying what had been agreed to. It changes no state: the caller wipes the
+    /// data and then calls `startOver()`. A history that cannot be written must never stop the wipe, so a failure is ignored.
+    func withdrawConsent(now: Date = .now) {
+        guard let consent else { return }
+        try? consentLog?.append(Self.event(.withdrawn, from: consent, at: now))
     }
 
     func setHideNumbers(_ hidden: Bool) {
@@ -74,6 +96,12 @@ final class AppState {
         stage = .welcome
     }
 
+    private static func event(_ kind: ConsentEvent.Kind, from record: ConsentRecord, at date: Date) -> ConsentEvent {
+        ConsentEvent(kind: kind, adultConfirmed: record.adultConfirmed, healthDataConsented: record.healthDataConsented,
+                     analyticsOptIn: record.analyticsOptIn, consentVersion: record.consentVersion,
+                     localeIdentifier: Locale.current.identifier, recordedAt: date)
+    }
+
     private static var encoder: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -86,12 +114,15 @@ final class AppState {
         return decoder
     }
 
-    /// A stored `.complete` is trusted only with a consent record for the current consent text.
+    /// A stored `.profile` or `.complete` is trusted only with a consent record for the current consent text.
     /// A record for an older text sends the person back to consent; no record at all, back to welcome.
-    private static func resolvedStage(stored: OnboardingStage, consent: ConsentRecord?) -> OnboardingStage {
-        guard stored == .complete else { return stored }
+    /// A stored `.complete` also needs the profile it promises: without one the person returns to the profile step.
+    private static func resolvedStage(stored: OnboardingStage, consent: ConsentRecord?,
+                                      profileExists: @MainActor () -> Bool) -> OnboardingStage {
+        guard stored == .profile || stored == .complete else { return stored }
         guard let consent else { return .welcome }
-        return consent.consentVersion == consentVersion ? .complete : .consent
+        guard consent.consentVersion == consentVersion else { return .consent }
+        return stored == .complete && profileExists() ? .complete : .profile
     }
 
     private func setStage(_ newStage: OnboardingStage) {

@@ -9,6 +9,7 @@ struct RootView: View {
             switch appState.stage {
             case .complete: MainTabView()
             case .welcome, .consent: OnboardingFlow()
+            case .profile: ProfileFlow()
             }
         }
         // Components that can show digits or ads (AdCard, NuriProgressBar) gate themselves on this.
