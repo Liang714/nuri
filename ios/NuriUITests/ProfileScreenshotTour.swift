@@ -34,7 +34,8 @@ final class ProfileScreenshotTour: XCTestCase {
         tour(language: "ko", locale: "ko_KR", suffix: "ko")
     }
 
-    /// Step 7 without a sex value, with a number under the commonly suggested minimum, and with numbers hidden.
+    /// Step 7 without a sex value, with a number under the commonly suggested minimum (committed with Done), with a number that
+    /// cannot be used, and with numbers hidden (no sex value, then tracking without a guide).
     @MainActor
     func testGuideVariants() {
         XCUIDevice.shared.appearance = .light
@@ -45,7 +46,12 @@ final class ProfileScreenshotTour: XCTestCase {
         let manual = app.textFields["profile.manualTarget"]
         manual.tap()
         manual.typeText("900")
+        app.buttons["profile.manualTarget.done"].tap()
         shot("profile-7-manual-below-light")
+        // The numbers are right-aligned: a tap at the very end of the field puts the caret after them, where Delete works.
+        manual.coordinate(withNormalizedOffset: CGVector(dx: 0.99, dy: 0.5)).tap()
+        manual.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "0")
+        shot("profile-7-manual-invalid-light")
 
         app = launch(language: "en", locale: "en_US")
         app.segmentedControls["profile.sex"].buttons.element(boundBy: 1).tap()
@@ -56,6 +62,35 @@ final class ProfileScreenshotTour: XCTestCase {
         app.buttons["profile.continue"].tap()
         step(app, 7)
         shot("profile-7-hidden-light")
+
+        app = launch(language: "en", locale: "en_US")
+        for _ in 1..<6 { app.buttons["profile.continue"].tap() }
+        step(app, 6)
+        flip(app.switches["profile.hideNumbers"])
+        app.buttons["profile.continue"].tap()
+        step(app, 7)
+        shot("profile-7-hidden-nosex-light")
+        flip(app.switches["profile.trackWithoutGuide"])
+        shot("profile-7-hidden-tracking-light")
+    }
+
+    /// Steps 1, 2 and 7 at the largest accessibility text size (menus instead of wheels and segments, labels that wrap).
+    @MainActor
+    func testAccessibilitySize() {
+        XCUIDevice.shared.appearance = .light
+        let app = XCUIApplication()
+        app.launchArguments = ["-uiTestFreshState", "-uiTestSkipToProfile", "-AppleLanguages", "(en)", "-AppleLocale", "en_US",
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        step(app, 1)
+        shot("profile-1-ax-light")
+        for n in 2...7 {
+            app.buttons["profile.continue"].tap()
+            step(app, n)
+            if n == 2 || n == 7 { shot("profile-\(n)-ax-light") }
+        }
+        app.swipeUp()
+        shot("profile-7-ax-scrolled-light")
     }
 
     // MARK: - Helpers

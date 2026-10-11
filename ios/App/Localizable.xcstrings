@@ -497,6 +497,22 @@
         }
       }
     },
+    "Daily guide" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily guide"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하루 가이드"
+          }
+        }
+      }
+    },
     "Diary" : {
       "localizations" : {
         "en" : {
@@ -525,6 +541,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "화면"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
           }
         }
       }
@@ -845,6 +877,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "키"
+          }
+        }
+      }
+    },
+    "Height, feet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Height, feet"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키, 피트"
+          }
+        }
+      }
+    },
+    "Height, inches" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Height, inches"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키, 인치"
           }
         }
       }
@@ -2065,6 +2129,22 @@
         }
       }
     },
+    "Without a sex value, Nuri can't calculate a guide, and numbers are hidden. Turn on Track without a guide to finish." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a sex value, Nuri can't calculate a guide, and numbers are hidden. Turn on Track without a guide to finish."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성별 값이 없으면 가이드를 계산할 수 없고 숫자도 숨겨져 있어요. 완료하려면 '가이드 없이 기록하기'를 켜 주세요."
+          }
+        }
+      }
+    },
     "Without a sex value, Nuri can't use the formula. Enter your own daily guide or track without one." : {
       "localizations" : {
         "en" : {
@@ -2141,6 +2221,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지금은 계정 없이 누리를 사용하고 나중에 계정을 추가할 수 있어요."
+          }
+        }
+      }
+    },
+    "You're tracking without a guide. Numbers stay hidden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're tracking without a guide. Numbers stay hidden."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가이드 없이 기록하고 있어요. 숫자는 숨겨져요."
           }
         }
       }
@@ -2253,6 +2349,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오늘의 세계, 아직 비어 있어요."
+          }
+        }
+      }
+    },
+    "kcal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal"
+          }
+        }
+      }
+    },
+    "kg" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kg"
+          }
+        }
+      }
+    },
+    "lb" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lb"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lb"
           }
         }
       }

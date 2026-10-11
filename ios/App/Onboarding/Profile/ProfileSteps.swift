@@ -38,11 +38,51 @@ private struct SelectionRow: View {
     }
 }
 
+/// The pickers that are small, fixed-size controls at the default text size and menus at accessibility sizes: a segment
+/// label does not fit there, and a wheel under the thumb takes the swipe that was meant to scroll the page (and changes the
+/// answer). A menu is a normal row that grows with the text.
+private struct CompactPickerStyle: ViewModifier {
+    enum Style { case segmented, wheel }
+    let style: Style
+    /// What the picker is called. A segmented control with a hidden label has none, so it is given here; a menu and a wheel
+    /// keep the one their title gives them (a second label would be read twice).
+    let label: Text
+    /// What the picker has selected, as VoiceOver should read it when the picker is a menu: the menu's label is hidden (the
+    /// section header is the visible label), and the selection would otherwise be left out of what is spoken.
+    let selection: Text
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    func body(content: Content) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            content.pickerStyle(.menu).accessibilityValue(selection)
+        } else {
+            switch style {
+            case .segmented: content.pickerStyle(.segmented).accessibilityLabel(label)
+            case .wheel: content.pickerStyle(.wheel)
+            }
+        }
+    }
+}
+
+private extension View {
+    func compactPickerStyle(_ style: CompactPickerStyle.Style, label: Text, selection: Text) -> some View {
+        modifier(CompactPickerStyle(style: style, label: label, selection: selection))
+    }
+}
+
 // MARK: - 1. About you
 
 struct AboutYouStep: View {
     @Binding var draft: ProfileDraft
     let currentYear: Int
+
+    private var sexTitle: Text {
+        switch draft.sex {
+        case .female?: Text("Female")
+        case .male?: Text("Male")
+        case nil: Text("Prefer not to say")
+        }
+    }
 
     var body: some View {
         Section {
@@ -52,7 +92,7 @@ struct AboutYouStep: View {
                     Text(verbatim: String(year)).tag(year)
                 }
             }
-            .pickerStyle(.wheel)
+            .compactPickerStyle(.wheel, label: Text("Year of birth"), selection: Text(verbatim: String(draft.birthYear)))
             .labelsHidden()
             .accessibilityIdentifier("profile.birthYear")
             .listRowBackground(Color.nuriSurface)
@@ -64,9 +104,8 @@ struct AboutYouStep: View {
                 Text("Male").tag(SexForEquation?.some(.male))
                 Text("Prefer not to say").tag(SexForEquation?.none)
             }
-            .pickerStyle(.segmented)
+            .compactPickerStyle(.segmented, label: Text("Sex for energy estimates"), selection: sexTitle)
             .labelsHidden()
-            .accessibilityLabel(Text("Sex for energy estimates"))
             .accessibilityIdentifier("profile.sex")
             .listRowBackground(Color.nuriSurface)
         } header: {
@@ -93,9 +132,8 @@ struct BodyStep: View {
                 Text("Metric").tag(UnitSystem.metric)
                 Text("Imperial").tag(UnitSystem.imperial)
             }
-            .pickerStyle(.segmented)
+            .compactPickerStyle(.segmented, label: Text("Units"), selection: unit == .metric ? Text("Metric") : Text("Imperial"))
             .labelsHidden()
-            .accessibilityLabel(Text("Units"))
             .accessibilityIdentifier("profile.units")
             .listRowBackground(Color.nuriSurface)
         } header: { NuriSectionHeader(Text("Units")) }
@@ -108,17 +146,40 @@ struct BodyStep: View {
         } header: { NuriSectionHeader(Text("Height")) }
 
         Section {
-            TextField("Weight", text: weightBinding)
-                .keyboardType(.decimalPad)
-                .font(.nuriBody)
-                .foregroundStyle(Color.nuriInk)
-                .frame(minHeight: NuriMetrics.minTouch)
-                .accessibilityIdentifier("profile.weight")
-                .listRowBackground(Color.nuriSurface)
+            HStack(spacing: 8) {
+                TextField("Weight", text: weightBinding)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .font(.nuriBody)
+                    .foregroundStyle(Color.nuriInk)
+                    .accessibilityValue(spokenWeight)
+                    .accessibilityIdentifier("profile.weight")
+                // The unit sits beside the number; VoiceOver reads it as part of the value instead.
+                weightUnit.font(.nuriBody).foregroundStyle(Color.nuriInkSoft).fixedSize().accessibilityHidden(true)
+            }
+            .frame(minHeight: NuriMetrics.minTouch)
+            .listRowBackground(Color.nuriSurface)
         } header: {
             NuriSectionHeader(Text("Weight"))
         } footer: {
             Text("Enter a weight between \(weightBound(\.lowerBound)) and \(weightBound(\.upperBound)).").nuriSecondaryText()
+        }
+    }
+
+    private var weightUnit: Text {
+        switch unit {
+        case .metric: Text("kg")
+        case .imperial: Text("lb")
+        }
+    }
+
+    /// "65 kg": the number as typed with its unit, so VoiceOver does not read a bare number. Nothing while the field is empty.
+    private var spokenWeight: Text {
+        let typed = weightBinding.wrappedValue
+        guard !typed.isEmpty else { return Text("") }
+        switch unit {
+        case .metric: return Text("\(typed) kg")
+        case .imperial: return Text("\(typed) lb")
         }
     }
 
@@ -130,8 +191,10 @@ struct BodyStep: View {
             set: { draft.heightCm = Double($0) }
         )
         return Stepper(value: cm, in: BodyInput.heightRangeCm, step: 1) {
-            Text("\(cm.wrappedValue.formatted()) cm").font(.nuriBody).foregroundStyle(Color.nuriInk)
+            // The stepper takes its label from this text: VoiceOver says "Height" and the value below says the number.
+            Text("\(cm.wrappedValue.formatted()) cm").font(.nuriBody).foregroundStyle(Color.nuriInk).accessibilityLabel(Text("Height"))
         }
+        .accessibilityValue(Text("\(cm.wrappedValue.formatted()) cm"))
         .accessibilityIdentifier("profile.heightCm")
         .listRowBackground(Color.nuriSurface)
     }
@@ -147,13 +210,13 @@ struct BodyStep: View {
             set: { draft.heightCm = BodyInput.heightCm(feet: current.feet, inches: $0) }
         )
         return HStack(spacing: 0) {
-            Picker("Height", selection: feet) {
+            Picker("Height, feet", selection: feet) {
                 ForEach(BodyInput.feetChoices, id: \.self) { Text("\($0) ft").tag($0) }
             }
             .pickerStyle(.wheel)
             .labelsHidden()
             .accessibilityIdentifier("profile.heightFeet")
-            Picker("Height", selection: inches) {
+            Picker("Height, inches", selection: inches) {
                 ForEach(BodyInput.inchChoices(forFeet: current.feet), id: \.self) { Text("\($0) in").tag($0) }
             }
             .pickerStyle(.wheel)

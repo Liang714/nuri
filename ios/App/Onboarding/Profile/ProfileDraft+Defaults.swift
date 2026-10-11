@@ -7,8 +7,12 @@ import SwiftData
 /// The years the profile steps work in. Always Gregorian: the person's own calendar (Japanese, Buddhist, ...) must not
 /// shift the year of birth picker or the age the engines compute.
 enum ProfileCalendar {
-    static func currentYear(now: Date = .now) -> Int {
-        Calendar(identifier: .gregorian).component(.year, from: now)
+    /// The Gregorian year of `now`. Only the device calendar's time zone counts (it decides when the new year starts for
+    /// this person); its own calendar system, which a Buddhist or Japanese setting would make 2569 or Reiwa 8, is ignored.
+    static func currentYear(now: Date = .now, deviceCalendar: Calendar = .current) -> Int {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = deviceCalendar.timeZone
+        return gregorian.component(.year, from: now)
     }
 
     /// Adults only: from 100 years ago to 18 years ago.

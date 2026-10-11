@@ -38,11 +38,21 @@ struct NuriApp: App {
         #else
         consentLog = SwiftDataConsentLog(context: container.mainContext)
         #endif
-        _appState = State(initialValue: AppState(
+        let state = AppState(
             defaults: defaults,
             consentLog: consentLog,
             profileExists: { (try? ProfileRepository(context: container.mainContext).exists()) ?? false }
-        ))
+        )
+        #if DEBUG
+        // UI tests that look at the profile at accessibility text sizes (where the consent switches sit below the fold) start
+        // there, through the same consent call the consent screen makes. Release builds ignore the argument.
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-uiTestFreshState"), arguments.contains("-uiTestSkipToProfile") {
+            state.chooseGuest()
+            try? state.recordConsent(adult: true, healthData: true, analytics: false)
+        }
+        #endif
+        _appState = State(initialValue: state)
     }
 
     var body: some Scene {

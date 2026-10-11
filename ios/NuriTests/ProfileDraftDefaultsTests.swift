@@ -53,10 +53,42 @@ import Testing
 
     // MARK: Year
 
+    /// 2026-07-01 12:00 UTC: the same calendar year in every time zone.
+    private static let midYear = Date(timeIntervalSince1970: 1_782_907_200)
+    private static let utc = TimeZone(identifier: "UTC")!
+
+    private static func calendar(_ identifier: Calendar.Identifier, in zone: TimeZone = utc) -> Calendar {
+        var calendar = Calendar(identifier: identifier)
+        calendar.timeZone = zone
+        return calendar
+    }
+
     @Test func theYearIsGregorianWhateverTheDeviceCalendarIs() {
-        // 2026-07-01 12:00 UTC: the same calendar year in every time zone.
-        let date = Date(timeIntervalSince1970: 1_782_907_200)
-        #expect(ProfileCalendar.currentYear(now: date) == 2026)
+        // The device calendar goes in as an argument, so a version that read it (or Calendar.current) would show a
+        // Buddhist 2569 or a Japanese Reiwa 8 here. Each control line shows that the calendar really differs.
+        let buddhist = Self.calendar(.buddhist)
+        #expect(buddhist.component(.year, from: Self.midYear) == 2569)
+        #expect(ProfileCalendar.currentYear(now: Self.midYear, deviceCalendar: buddhist) == 2026)
+
+        let japanese = Self.calendar(.japanese)
+        #expect(japanese.component(.year, from: Self.midYear) == 8)
+        #expect(ProfileCalendar.currentYear(now: Self.midYear, deviceCalendar: japanese) == 2026)
+
+        let persian = Self.calendar(.persian)
+        #expect(persian.component(.year, from: Self.midYear) == 1405)
+        #expect(ProfileCalendar.currentYear(now: Self.midYear, deviceCalendar: persian) == 2026)
+
+        #expect(ProfileCalendar.currentYear(now: Self.midYear, deviceCalendar: Self.calendar(.gregorian)) == 2026)
+    }
+
+    @Test func theYearFollowsTheDeviceTimeZone() throws {
+        // 2026-12-31 23:30 UTC is already New Year's Day 2027 in Seoul (UTC+9), and still 2026 in UTC and in New York.
+        let lateOnNewYearsEve = Date(timeIntervalSince1970: 1_798_759_800)
+        let seoul = try #require(TimeZone(identifier: "Asia/Seoul"))
+        let newYork = try #require(TimeZone(identifier: "America/New_York"))
+        #expect(ProfileCalendar.currentYear(now: lateOnNewYearsEve, deviceCalendar: Self.calendar(.buddhist, in: seoul)) == 2027)
+        #expect(ProfileCalendar.currentYear(now: lateOnNewYearsEve, deviceCalendar: Self.calendar(.gregorian, in: newYork)) == 2026)
+        #expect(ProfileCalendar.currentYear(now: lateOnNewYearsEve, deviceCalendar: Self.calendar(.gregorian)) == 2026)
     }
 
     @Test func birthYearsRunFrom100To18YearsAgo() {
@@ -151,5 +183,23 @@ import Testing
         let opened = ProfileDraft.opening(context: context, regionCode: "KR", currentYear: 2026)
         #expect(opened.birthYear == 1926)
         withExtendedLifetime(container) {}
+    }
+
+    // MARK: Prefill once
+
+    @MainActor
+    @Test func theOpeningDraftIsReadOnceNoMatterHowOftenTheViewAsks() {
+        let box = OpeningDraftBox()
+        var reads = 0
+        let first = box.draft {
+            reads += 1
+            return ProfileDraft.starting(regionCode: "KR", currentYear: 2026)
+        }
+        let second = box.draft {
+            reads += 1
+            return ProfileDraft.starting(regionCode: "US", currentYear: 2030)
+        }
+        #expect(reads == 1, "the store is read on the first ask only")
+        #expect(second == first, "later asks return the first draft, not a fresh read")
     }
 }

@@ -26,6 +26,21 @@ enum ProfileStep: Int, CaseIterable {
     var previous: ProfileStep? { Self(rawValue: rawValue - 1) }
 }
 
+/// Holds the draft the flow opens with, so the store is read once for as long as the flow is on screen however often its
+/// body is evaluated. SwiftUI keeps the first box a `@State` is given and drops later ones.
+@MainActor
+final class OpeningDraftBox {
+    private var opened: ProfileDraft?
+
+    /// The first draft `open` returned; `open` runs only on the first ask.
+    func draft(_ open: () -> ProfileDraft) -> ProfileDraft {
+        if let opened { return opened }
+        let draft = open()
+        opened = draft
+        return draft
+    }
+}
+
 /// The seven profile steps, one on screen at a time. It starts from the saved profile when there is one (so running it
 /// again never overwrites saved answers with defaults) and from the starting values otherwise.
 /// `onFinish` runs after the profile is saved: onboarding moves on, a later edit screen can simply close.
@@ -34,11 +49,12 @@ struct ProfileFlow: View {
     var currentYear: Int = ProfileCalendar.currentYear()
     var regionCode: String? = Locale.current.region?.identifier
     let onFinish: () -> Void
+    @State private var opening = OpeningDraftBox()
 
     var body: some View {
-        // The editor keeps the first draft it is given, so a later re-evaluation of this body changes nothing.
+        // The saved profile is read on the first evaluation only; the editor keeps the draft it is given.
         ProfileEditor(
-            initial: .opening(context: modelContext, regionCode: regionCode, currentYear: currentYear),
+            initial: opening.draft { .opening(context: modelContext, regionCode: regionCode, currentYear: currentYear) },
             currentYear: currentYear,
             onFinish: onFinish
         )
@@ -53,6 +69,8 @@ private struct ProfileEditor: View {
     @State private var step: ProfileStep = .aboutYou
     /// The weight field's text while the person edits it; nil shows the draft's weight.
     @State private var weightEdit: String?
+    /// The own-number field's text while the person edits it; nil shows the draft's own number.
+    @State private var manualEdit: String?
     @State private var saveFailed = false
     let currentYear: Int
     let onFinish: () -> Void
@@ -65,6 +83,10 @@ private struct ProfileEditor: View {
 
     private var canContinue: Bool {
         step != .body || bodyStepIsComplete(draft: draft, weightEdit: weightEdit, locale: locale)
+    }
+
+    private var canFinish: Bool {
+        dailyGuideStepCanFinish(draft: draft, manualText: manualEdit, hideNumbers: appState.hideNumbers, currentYear: currentYear)
     }
 
     var body: some View {
@@ -97,7 +119,8 @@ private struct ProfileEditor: View {
         case .goal: GoalStep(draft: $draft)
         case .healthQuestions: HealthQuestionsStep(draft: $draft)
         case .numbers: NumbersStep()
-        case .dailyGuide: DailyGuideStep(draft: $draft, currentYear: currentYear, hideNumbers: appState.hideNumbers)
+        case .dailyGuide:
+            DailyGuideStep(draft: $draft, manualEdit: $manualEdit, currentYear: currentYear, hideNumbers: appState.hideNumbers)
         }
     }
 
@@ -119,6 +142,7 @@ private struct ProfileEditor: View {
             if step.next == nil {
                 Button { finish() } label: { Text("Finish") }
                     .buttonStyle(NuriPrimaryButtonStyle())
+                    .disabled(!canFinish)
                     .accessibilityIdentifier("profile.finish")
             } else {
                 Button { move(to: step.next) } label: { Text("Continue") }

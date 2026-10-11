@@ -11,7 +11,7 @@ This is the app shell. Several features are placeholders; see [What is real and 
 
 The bundle id is the placeholder `app.nuri.ios` (tests: `app.nuri.ios.tests`, `app.nuri.ios.uitests`) and no development team is set yet. The simulator needs no signing; running on a device or shipping needs a real bundle id and team first.
 
-Launch argument `-uiTestFreshState` runs the app against an empty, throwaway settings store, so onboarding starts from the welcome screen. The UI tests use it; you can add it under Edit Scheme > Run > Arguments to restart onboarding at will.
+Launch argument `-uiTestFreshState` runs the app against an empty, throwaway settings store, so onboarding starts from the welcome screen. The UI tests use it; you can add it under Edit Scheme > Run > Arguments to restart onboarding at will. Together with `-uiTestFreshState`, the debug-only argument `-uiTestSkipToProfile` records consent through the app's own consent call and starts on the first profile step (used by UI tests that look at the profile at accessibility text sizes, where the consent switches are below the fold).
 
 ## Tests
 

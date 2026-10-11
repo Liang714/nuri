@@ -80,8 +80,10 @@ import Testing
 
     /// Literals in these files that are not copy: an empty string or a single character (a separator), an SF Symbol name,
     /// an accessibility identifier handed on as an argument (they all start with "profile.").
+    private static let symbolNames: Set = ["checkmark", "exclamationmark.circle"]
+
     private static func isCopy(_ literal: String) -> Bool {
-        literal.count > 1 && literal != "checkmark" && !literal.hasPrefix("profile.")
+        literal.count > 1 && !symbolNames.contains(literal) && !literal.hasPrefix("profile.")
     }
 
     @Test func everyStringLiteralInTheProfileViewsIsACatalogKey() throws {
@@ -100,6 +102,29 @@ import Testing
             }
         }
         #expect(literalCount > 50, "The scan found only \(literalCount) literals; is it reading the right files?")
+    }
+
+    /// The strings added for the units, the labelled own-number field, the hidden-numbers guide and the VoiceOver height labels.
+    private static let unitsAndGuideStrings: [(key: String, korean: String)] = [
+        ("kg", "kg"),
+        ("lb", "lb"),
+        ("kcal", "kcal"),
+        ("Done", "완료"),
+        ("Daily guide", "하루 가이드"),
+        ("You're tracking without a guide. Numbers stay hidden.", "가이드 없이 기록하고 있어요. 숫자는 숨겨져요."),
+        ("Without a sex value, Nuri can't calculate a guide, and numbers are hidden. Turn on Track without a guide to finish.",
+         "성별 값이 없으면 가이드를 계산할 수 없고 숫자도 숨겨져 있어요. 완료하려면 '가이드 없이 기록하기'를 켜 주세요."),
+        ("Height, feet", "키, 피트"),
+        ("Height, inches", "키, 인치"),
+    ]
+
+    @Test func theUnitAndGuideStringsAreInTheCatalogWithKorean() throws {
+        let catalog = try Self.catalog()
+        for (key, korean) in Self.unitsAndGuideStrings {
+            let entry = try #require(catalog[key], "\(key.debugDescription) is not in Localizable.xcstrings")
+            #expect(entry.english == key, "\(key.debugDescription) English value")
+            #expect(entry.korean == korean, "\(key.debugDescription) Korean value")
+        }
     }
 
     @Test func theConsentScreenChromeIsInTheCatalogWithKorean() throws {
