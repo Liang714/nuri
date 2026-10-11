@@ -34,6 +34,8 @@ python3 scripts/lint_copy.py ios/App/Localizable.xcstrings
 (cd scripts && python3 -m unittest test_lint_copy -v)
 ```
 
+`ProfileScreenshotTour` (UI tests) skips itself; run it with `TEST_RUNNER_NURI_SCREENSHOTS=1` and `-only-testing:NuriUITests/ProfileScreenshotTour` to save screenshots of the profile steps to `build/screenshots/`.
+
 `-parallel-testing-enabled NO` keeps Xcode from cloning simulators; the clones stalled in local runs. If you have no iPhone 17 simulator, swap in any installed iPhone name. CI (`.github/workflows/ios.yml`, `engines.yml`) runs the same commands. The app job selects the newest installed non-beta Xcode and an iPhone simulator whose iOS version matches that Xcode's SDK (`scripts/pick_simulator.py`, newest older runtime as the fallback), and passes the simulator by id.
 
 ## Layout
@@ -48,6 +50,7 @@ ios/
     AuthService.swift     sign-in seam; UnavailableAuthService is the only implementation
     EmailValidator.swift
     Onboarding/           Welcome, email sign-in placeholder, Consent, DataUse
+    Onboarding/Profile/   the seven profile steps (ProfileFlow, ProfileSteps, DailyGuideStep) and their input helpers
     Tabs/                 My Nuri, Diary, Plan, You, and the Add food sheet
     Localizable.xcstrings every user-facing string, English and Korean
   NuriTests/            unit tests (AppState, EmailValidator)
@@ -78,6 +81,7 @@ Working in this build:
 
 - Welcome, then consent, then the app. Consent requires the adult confirmation and health-data consent; anonymous usage stats start off. The consent record (choices, time, consent-text version) is stored on the device, and a changed consent text sends people back to consent.
 - The four tabs: My Nuri, Diary, Plan, You.
+- Profile onboarding after consent: year of birth, optional sex (only for the energy formula), body in metric or imperial, activity level, goal, a few health questions, Hide numbers, then a daily guide that is calculated (Mifflin-St Jeor), typed in, or skipped. With Hide numbers on, the guide step shows no figure. `ProfileFlow` takes its Finish action as a closure and starts from the saved profile when there is one, so it can be reused to edit the profile later.
 - Hide numbers toggle in You, saved on the device.
 - You: consent status, what we store and why, the wellness disclaimer, version, and Start over, which clears onboarding, consent and Hide numbers on this device.
 
@@ -88,7 +92,7 @@ Placeholders or not built yet:
 - **Food search, barcode and label scanning.** The Add food sheet is an empty state; there is no food database in the app.
 - **My Nuri and Diary.** The world is empty, the daily guide is a text placeholder, and nothing can be added, so the Diary stays empty. There is no persistent diary storage.
 - **Plan.** An empty state. `MovementPlanner` exists in NuriEngines but is not connected.
-- **Profile.** Age, height, weight, sex and goal are not collected yet, so no targets are computed.
+- **Profile screens after onboarding.** The profile is collected and saved, but nothing outside onboarding shows or edits it yet (My Nuri's guide line is still placeholder text).
 - **Data export and delete.** Not built. Start over clears only the local onboarding choices.
 
 Next up, in order: local core (storage, profile, ledger, diary, plan, bundled food data), then Supabase accounts and sign-in, then the food data pipeline.

@@ -55,6 +55,7 @@ struct WelcomeView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .buttonStyle(NuriTextButtonStyle())
+                        .accessibilityIdentifier("welcome.withoutAccount")
                         Text("For adults 18 and over.")
                             .font(.nuriFootnote)
                             .foregroundStyle(Color.nuriInkSoft)

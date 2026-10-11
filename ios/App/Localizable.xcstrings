@@ -1,6 +1,166 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ cm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ cm"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@cm"
+          }
+        }
+      }
+    },
+    "%@ kcal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kcal"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@kcal"
+          }
+        }
+      }
+    },
+    "%@ kg" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@kg"
+          }
+        }
+      }
+    },
+    "%@ lb" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ lb"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@lb"
+          }
+        }
+      }
+    },
+    "%lld ft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ft"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldft"
+          }
+        }
+      }
+    },
+    "%lld in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld in"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldin"
+          }
+        }
+      }
+    },
+    "A doctor has said I have a heart condition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A doctor has said I have a heart condition"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의사에게 심장 질환이 있다는 말을 들었어요"
+          }
+        }
+      }
+    },
+    "A few health questions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few health questions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건강 관련 질문 몇 가지"
+          }
+        }
+      }
+    },
+    "A starting estimate. Real needs vary." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A starting estimate. Real needs vary."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작을 위한 추정치예요. 실제 필요량은 사람마다 달라요."
+          }
+        }
+      }
+    },
+    "A weight-loss adjustment isn't used at your current BMI. Consider talking with a clinician." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A weight-loss adjustment isn't used at your current BMI. Consider talking with a clinician."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 BMI에서는 체중 감량 조정을 사용하지 않아요. 의료 전문가와 상의해 보세요."
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "en" : {
@@ -17,6 +177,38 @@
         }
       }
     },
+    "About %@ kcal a day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About %@ kcal a day"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하루 약 %@kcal"
+          }
+        }
+      }
+    },
+    "About you" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About you"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나에 대해"
+          }
+        }
+      }
+    },
     "Account sign-in arrives in a later build" : {
       "localizations" : {
         "en" : {
@@ -29,6 +221,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "계정 로그인은 이후 버전에서 제공돼요"
+          }
+        }
+      }
+    },
+    "Activity level" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activity level"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동 수준"
           }
         }
       }
@@ -129,6 +337,22 @@
         }
       }
     },
+    "Back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이전"
+          }
+        }
+      }
+    },
     "Before you start" : {
       "localizations" : {
         "en" : {
@@ -141,6 +365,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "시작하기 전에"
+          }
+        }
+      }
+    },
+    "Body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Body"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신체 정보"
           }
         }
       }
@@ -241,6 +481,22 @@
         }
       }
     },
+    "Couldn't save your profile" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save your profile"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로필을 저장하지 못했어요"
+          }
+        }
+      }
+    },
     "Diary" : {
       "localizations" : {
         "en" : {
@@ -273,6 +529,22 @@
         }
       }
     },
+    "Eat better" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eat better"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 균형 있게 먹기"
+          }
+        }
+      }
+    },
     "Email" : {
       "localizations" : {
         "en" : {
@@ -301,6 +573,102 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이메일 로그인은 이후 버전에서 제공돼요. 지금은 계정 없이 누리를 사용할 수 있어요."
+          }
+        }
+      }
+    },
+    "Enter a number from 1 to %@ kcal." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a number from 1 to %@ kcal."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1에서 %@kcal 사이의 숫자를 입력해 주세요."
+          }
+        }
+      }
+    },
+    "Enter a weight between %@ and %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a weight between %@ and %@."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "몸무게를 %@에서 %@ 사이로 입력해 주세요."
+          }
+        }
+      }
+    },
+    "Exercise 3–5 days a week." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exercise 3–5 days a week."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일주일에 3–5일 운동해요."
+          }
+        }
+      }
+    },
+    "Extra active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra active"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "매우 활발하게 활동해요"
+          }
+        }
+      }
+    },
+    "Female" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Female"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여성"
+          }
+        }
+      }
+    },
+    "Finish" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
           }
         }
       }
@@ -369,6 +737,22 @@
         }
       }
     },
+    "Gain weight gradually" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gain weight gradually"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "천천히 체중 늘리기"
+          }
+        }
+      }
+    },
     "Given" : {
       "localizations" : {
         "en" : {
@@ -385,6 +769,54 @@
         }
       }
     },
+    "Goal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goal"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목표"
+          }
+        }
+      }
+    },
+    "Goal adjustment" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goal adjustment"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목표 조정"
+          }
+        }
+      }
+    },
+    "Hard exercise 6–7 days a week." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hard exercise 6–7 days a week."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일주일에 6–7일 강도 높게 운동해요."
+          }
+        }
+      }
+    },
     "Health data consent" : {
       "localizations" : {
         "en" : {
@@ -397,6 +829,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "건강 데이터 동의"
+          }
+        }
+      }
+    },
+    "Height" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Height"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "키"
           }
         }
       }
@@ -465,6 +913,278 @@
         }
       }
     },
+    "I am pregnant or gave birth in the last six months" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am pregnant or gave birth in the last six months"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "임신 중이거나 출산한 지 6개월이 지나지 않았어요"
+          }
+        }
+      }
+    },
+    "I feel chest pain during physical activity" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I feel chest pain during physical activity"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "몸을 움직일 때 가슴 통증이 있어요"
+          }
+        }
+      }
+    },
+    "I have a bone or joint problem that activity could worsen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I have a bone or joint problem that activity could worsen"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동하면 악화될 수 있는 뼈나 관절 문제가 있어요"
+          }
+        }
+      }
+    },
+    "I know of another reason I should not be active without advice" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I know of another reason I should not be active without advice"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "조언 없이 활동하면 안 되는 다른 이유가 있어요"
+          }
+        }
+      }
+    },
+    "I lose balance from dizziness or have fainted recently" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I lose balance from dizziness or have fainted recently"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "어지러워서 균형을 잃거나 최근 실신한 적이 있어요"
+          }
+        }
+      }
+    },
+    "I take medicine for blood pressure or a heart condition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I take medicine for blood pressure or a heart condition"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "혈압이나 심장 질환 약을 복용하고 있어요"
+          }
+        }
+      }
+    },
+    "If any of these apply, Nuri suggests a light plan and recommends checking with a clinician first." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If any of these apply, Nuri suggests a light plan and recommends checking with a clinician first."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하나라도 해당하면 누리는 가벼운 플랜을 제안하고 먼저 의료 전문가와 상의하도록 권해요."
+          }
+        }
+      }
+    },
+    "Imperial" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imperial"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "야드파운드법"
+          }
+        }
+      }
+    },
+    "Just track, no goal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just track, no goal"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목표 없이 기록만 하기"
+          }
+        }
+      }
+    },
+    "Keep my weight steady" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep my weight steady"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지금 체중 유지하기"
+          }
+        }
+      }
+    },
+    "Light movement or exercise 1–3 days a week." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light movement or exercise 1–3 days a week."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일주일에 1–3일 가볍게 움직이거나 운동해요."
+          }
+        }
+      }
+    },
+    "Lightly active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightly active"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가볍게 활동해요"
+          }
+        }
+      }
+    },
+    "Little exercise, mostly desk work." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little exercise, mostly desk work."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동은 거의 없고 주로 앉아서 일해요."
+          }
+        }
+      }
+    },
+    "Lose weight gradually" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lose weight gradually"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "천천히 체중 줄이기"
+          }
+        }
+      }
+    },
+    "Maintenance estimate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance estimate"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유지 추정치"
+          }
+        }
+      }
+    },
+    "Male" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Male"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "남성"
+          }
+        }
+      }
+    },
+    "Many people need at least %@ kcal a day. Consider talking with a registered dietitian or a clinician." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Many people need at least %@ kcal a day. Consider talking with a registered dietitian or a clinician."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "많은 사람에게 하루 최소 %@kcal가 필요해요. 영양사나 의료 전문가와 상의해 보세요."
+          }
+        }
+      }
+    },
     "Meals you add appear here, day by day." : {
       "localizations" : {
         "en" : {
@@ -477,6 +1197,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "추가한 식사가 날짜별로 여기에 표시돼요."
+          }
+        }
+      }
+    },
+    "Method" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Method"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방법"
+          }
+        }
+      }
+    },
+    "Metric" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metric"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "미터법"
+          }
+        }
+      }
+    },
+    "Mifflin-St Jeor" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mifflin-St Jeor"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mifflin-St Jeor"
+          }
+        }
+      }
+    },
+    "Moderately active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderately active"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "적당히 활동해요"
+          }
+        }
+      }
+    },
+    "Mostly sitting" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostly sitting"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대부분 앉아서 지내요"
           }
         }
       }
@@ -529,6 +1329,22 @@
         }
       }
     },
+    "None" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "없음"
+          }
+        }
+      }
+    },
     "Nothing added yet" : {
       "localizations" : {
         "en" : {
@@ -557,6 +1373,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오늘은 아직 추가한 음식이 없어요"
+          }
+        }
+      }
+    },
+    "Numbers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numbers"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "숫자"
           }
         }
       }
@@ -641,6 +1473,22 @@
         }
       }
     },
+    "Only used in the Mifflin-St Jeor formula. Choose Prefer not to say to set your daily guide yourself." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only used in the Mifflin-St Jeor formula. Choose Prefer not to say to set your daily guide yourself."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mifflin-St Jeor 공식에만 사용해요. 밝히지 않음을 선택하면 하루 가이드를 직접 정할 수 있어요."
+          }
+        }
+      }
+    },
     "Optional" : {
       "localizations" : {
         "en" : {
@@ -653,6 +1501,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "선택"
+          }
+        }
+      }
+    },
+    "Physical job or training twice a day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Physical job or training twice a day."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "몸을 쓰는 일을 하거나 하루 두 번 훈련해요."
           }
         }
       }
@@ -689,6 +1553,22 @@
         }
       }
     },
+    "Prefer not to say" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prefer not to say"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "밝히지 않음"
+          }
+        }
+      }
+    },
     "Privacy" : {
       "localizations" : {
         "en" : {
@@ -705,6 +1585,22 @@
         }
       }
     },
+    "Raised to the commonly suggested minimum." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raised to the commonly suggested minimum."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반적으로 권장되는 최소치로 올렸어요."
+          }
+        }
+      }
+    },
     "Required" : {
       "localizations" : {
         "en" : {
@@ -717,6 +1613,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "필수"
+          }
+        }
+      }
+    },
+    "Review it anytime in You." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review it anytime in You."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언제든 나 탭에서 확인할 수 있어요."
           }
         }
       }
@@ -785,6 +1697,22 @@
         }
       }
     },
+    "Sex for energy estimates" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sex for energy estimates"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "에너지 추정에 쓰는 성별"
+          }
+        }
+      }
+    },
     "Share anonymous usage stats" : {
       "localizations" : {
         "en" : {
@@ -849,6 +1777,22 @@
         }
       }
     },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %lld of %lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$lld단계 중 %1$lld단계"
+          }
+        }
+      }
+    },
     "Store my food and activity data" : {
       "localizations" : {
         "en" : {
@@ -877,6 +1821,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "프로필을 설정하면 이번 주 제안을 받을 수 있어요."
+          }
+        }
+      }
+    },
+    "Support my training" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support my training"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동 뒷받침하기"
+          }
+        }
+      }
+    },
+    "That's below the commonly suggested minimum" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's below the commonly suggested minimum"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반적으로 권장되는 최소치보다 낮아요"
           }
         }
       }
@@ -929,6 +1905,22 @@
         }
       }
     },
+    "Track without a guide" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Track without a guide"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가이드 없이 기록하기"
+          }
+        }
+      }
+    },
     "Turn on the two required items to continue." : {
       "localizations" : {
         "en" : {
@@ -941,6 +1933,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "계속하려면 필수 항목 두 개를 켜 주세요."
+          }
+        }
+      }
+    },
+    "Units" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Units"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "단위"
+          }
+        }
+      }
+    },
+    "Use my own number" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use my own number"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직접 입력하기"
           }
         }
       }
@@ -977,6 +2001,22 @@
         }
       }
     },
+    "Very active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very active"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활발하게 활동해요"
+          }
+        }
+      }
+    },
     "We will send a 6-digit code. No password to remember." : {
       "localizations" : {
         "en" : {
@@ -989,6 +2029,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "6자리 코드를 보내 드려요. 비밀번호는 필요 없어요."
+          }
+        }
+      }
+    },
+    "Weight" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weight"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "몸무게"
           }
         }
       }
@@ -1009,6 +2065,38 @@
         }
       }
     },
+    "Without a sex value, Nuri can't use the formula. Enter your own daily guide or track without one." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a sex value, Nuri can't use the formula. Enter your own daily guide or track without one."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성별 값이 없으면 공식을 사용할 수 없어요. 하루 가이드를 직접 입력하거나 가이드 없이 기록하세요."
+          }
+        }
+      }
+    },
+    "Year of birth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year of birth"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출생 연도"
+          }
+        }
+      }
+    },
     "You" : {
       "localizations" : {
         "en" : {
@@ -1021,6 +2109,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "나"
+          }
+        }
+      }
+    },
+    "You can change this anytime in You." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can change this anytime in You."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언제든 나 탭에서 바꿀 수 있어요."
           }
         }
       }
@@ -1041,6 +2145,22 @@
         }
       }
     },
+    "Your daily guide" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your daily guide"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하루 가이드"
+          }
+        }
+      }
+    },
     "Your daily guide appears after you set up your profile." : {
       "localizations" : {
         "en" : {
@@ -1053,6 +2173,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "프로필을 설정하면 하루 가이드가 표시돼요."
+          }
+        }
+      }
+    },
+    "Your daily guide is set. Numbers stay hidden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your daily guide is set. Numbers stay hidden."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하루 가이드가 정해졌어요. 숫자는 숨겨져요."
           }
         }
       }
