@@ -39,7 +39,7 @@ Source spec: `~/Downloads/nutribalance_build_spec.md` (written for a team; Flutt
 | Ads | Privacy-safe sponsored/affiliate content only; no ad SDKs, no user data shared |
 | Premium | Ad-free, photo logging, advanced insights, meal plan + grocery list, progressive weekly workout programs |
 | Pricing | $4.99/mo, $29.99/yr, 7-day trial on annual (App Store sets local prices in each country) |
-| Age | 18+ (App Store rating 17+) |
+| Age | 18+ everywhere, including Korea (App Store rating 17+). Confirmed 2026-10-11: matches MyFitnessPal, Noom and Lose It!, and the engines use adult-only guidelines (WHO 18+, adult BMI cutoffs). Korea's Civil Act adult age is 19, so the Korean terms add a line requiring a legal guardian's consent for subscriptions by users under 19 (added with monetization). Have a Korean lawyer review the terms before launch. |
 
 ## Architecture
 
