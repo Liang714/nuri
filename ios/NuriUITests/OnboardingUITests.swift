@@ -79,6 +79,23 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(action.frame.width, 44, "action width \(action.frame.width)")
     }
 
+    // MARK: - Consent that cannot be saved
+
+    @MainActor
+    func testConsentThatCannotBeSavedShowsAnAlertAndStaysOnConsent() {
+        let app = launchFresh(extraArguments: ["-uiTestConsentWriteFails"])
+        app.buttons["Use without an account"].tap()
+        flip(app.switches["consent.adult"])
+        flip(app.switches["consent.healthData"])
+        app.buttons["consent.continue"].tap()
+
+        let alert = app.alerts["Couldn't save your consent"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5), "A failed consent write must be shown, not swallowed")
+        XCTAssertTrue(alert.staticTexts["Please try again."].exists)
+        alert.buttons["OK"].tap()
+        XCTAssertTrue(app.buttons["consent.continue"].waitForExistence(timeout: 5), "Consent is not granted, so the person stays here")
+    }
+
     // MARK: - Accessibility audits (contrast, element descriptions, hit regions, text clipping, Dynamic Type)
 
     @MainActor
@@ -113,11 +130,11 @@ final class OnboardingUITests: XCTestCase {
         try audit(app)
     }
 
-    /// Fresh-state launch in English, whatever the simulator's own language is, so labels and identifiers match.
+    /// Fresh-state launch, in English unless told otherwise, whatever the simulator's own language is, so labels and identifiers match.
     @MainActor
-    private func launchFresh() -> XCUIApplication {
+    private func launchFresh(extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-uiTestFreshState", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
+        app.launchArguments = ["-uiTestFreshState", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"] + extraArguments
         app.launch()
         return app
     }

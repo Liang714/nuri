@@ -30,9 +30,17 @@ struct NuriApp: App {
 
         let container = Self.makeContainer(inMemory: inMemory)
         self.container = container
+        let consentLog: any ConsentLogging
+        #if DEBUG
+        // UI tests prove that a consent record that cannot be written is shown to the person. Release builds ignore the argument.
+        consentLog = ProcessInfo.processInfo.arguments.contains("-uiTestConsentWriteFails")
+            ? UnwritableConsentLog() : SwiftDataConsentLog(context: container.mainContext)
+        #else
+        consentLog = SwiftDataConsentLog(context: container.mainContext)
+        #endif
         _appState = State(initialValue: AppState(
             defaults: defaults,
-            consentLog: SwiftDataConsentLog(context: container.mainContext),
+            consentLog: consentLog,
             profileExists: { (try? ProfileRepository(context: container.mainContext).exists()) ?? false }
         ))
     }
@@ -68,3 +76,14 @@ struct NuriApp: App {
         }
     }
 }
+
+#if DEBUG
+/// A consent history that always fails to write (UI tests only, see `-uiTestConsentWriteFails`).
+@MainActor
+private struct UnwritableConsentLog: ConsentLogging {
+    struct WriteFailure: Error {}
+
+    func append(_ event: ConsentEvent) throws { throw WriteFailure() }
+    func events() throws -> [ConsentEvent] { [] }
+}
+#endif

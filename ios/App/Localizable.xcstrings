@@ -225,6 +225,22 @@
         }
       }
     },
+    "Couldn't save your consent" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save your consent"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동의를 저장하지 못했어요"
+          }
+        }
+      }
+    },
     "Diary" : {
       "localizations" : {
         "en" : {
@@ -653,6 +669,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "플랜"
+          }
+        }
+      }
+    },
+    "Please try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please try again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 시도해 주세요."
           }
         }
       }

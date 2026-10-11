@@ -6,6 +6,7 @@ struct ConsentView: View {
     @State private var adult = false
     @State private var healthData = false
     @State private var analytics = false
+    @State private var couldNotSave = false
 
     private var ready: Bool { adult && healthData }
 
@@ -39,10 +40,15 @@ struct ConsentView: View {
         .nuriGroupedList()
         .navigationTitle(Text(ConsentCopy.screenTitle))
         .navigationBarTitleDisplayMode(.large)
+        .alert(Text(ConsentCopy.couldNotSaveTitle), isPresented: $couldNotSave) {
+            Button(role: .cancel) {} label: { Text(ConsentCopy.ok) }
+        } message: {
+            Text(ConsentCopy.couldNotSaveMessage)
+        }
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 8) {
                 Button {
-                    try? appState.recordConsent(adult: adult, healthData: healthData, analytics: analytics)
+                    submit()
                 } label: { Text(ConsentCopy.continueButton) }
                 .buttonStyle(NuriPrimaryButtonStyle())
                 .disabled(!ready)
@@ -55,6 +61,16 @@ struct ConsentView: View {
             .padding(.horizontal, NuriMetrics.screenMargin)
             .padding(.vertical, 12)
             .background(.bar)
+        }
+    }
+
+    private func submit() {
+        do throws(ConsentError) {
+            try appState.recordConsent(adult: adult, healthData: healthData, analytics: analytics)
+        } catch {
+            // Only a history that could not be written reaches here (the button is off until both required items are on).
+            // Consent is not granted then, so say so instead of leaving a button that seems to do nothing.
+            couldNotSave = error == .couldNotRecord
         }
     }
 

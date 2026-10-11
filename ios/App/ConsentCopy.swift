@@ -24,7 +24,14 @@ enum ConsentCopy {
     static let dataUseLink: LocalizedStringResource = "What we store and why"
     static let continueButton: LocalizedStringResource = "Continue"
     static let requiredHint: LocalizedStringResource = "Turn on the two required items to continue."
+    // Shown when the consent record cannot be written (the person stays here and may try again).
+    static let couldNotSaveTitle: LocalizedStringResource = "Couldn't save your consent"
+    static let couldNotSaveMessage: LocalizedStringResource = "Please try again."
+    static let ok: LocalizedStringResource = "OK"
 
-    /// Not pinned to the consent version: titles, section headers, the link and the button on the consent screen.
-    static let chrome: [LocalizedStringResource] = [screenTitle, requiredHeader, optionalHeader, dataUseLink, continueButton, requiredHint]
+    /// Not pinned to the consent version: titles, section headers, the link, the button and the could-not-save alert on the consent screen.
+    static let chrome: [LocalizedStringResource] = [
+        screenTitle, requiredHeader, optionalHeader, dataUseLink, continueButton, requiredHint,
+        couldNotSaveTitle, couldNotSaveMessage, ok,
+    ]
 }
